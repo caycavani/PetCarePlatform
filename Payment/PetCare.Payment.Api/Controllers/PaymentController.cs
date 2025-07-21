@@ -1,28 +1,42 @@
-using Microsoft.AspNetCore.Mvc;
-using PetCare.Pets.Application.DTOs;
-using PetCare.Pets.Application.UseCases;
+﻿using Microsoft.AspNetCore.Mvc;
+using PetCare.Shared.DTOs;
+using System.Net.Http;
+using System.Net.Http.Json;
 
-namespace PetCare.Pets.Api.Controllers
+namespace PetCare.Payment.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class PaymentController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class PetController : ControllerBase
+    private readonly HttpClient _httpClient;
+
+    public PaymentController(HttpClient httpClient)
     {
-        private readonly RegisterPetUseCase _useCase;
+        _httpClient = httpClient;
+    }
 
-        public PetController(RegisterPetUseCase useCase)
+    [HttpPost("register-pet")]
+    public async Task<IActionResult> RegisterPetAsync([FromBody] CreatePetRequestDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
         {
-            _useCase = useCase;
+            // 🚀 Enviar el DTO al microservicio de Pets vía HTTP POST
+            var response = await _httpClient.PostAsJsonAsync("/api/pet", dto);
+
+            if (!response.IsSuccessStatusCode)
+                return StatusCode((int)response.StatusCode, "Error al registrar la mascota en Pets.Api");
+
+            // 🧾 Leer el contenido retornado (por ejemplo, el Id generado)
+            var content = await response.Content.ReadFromJsonAsync<object>();
+            return Ok(content);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreatePetDto dto)
+        catch (Exception ex)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var id = await _useCase.ExecuteAsync(dto);
-            return Ok(new { Id = id });
+            return StatusCode(500, $"Error al consumir Pets.Api: {ex.Message}");
         }
     }
 }

@@ -3,10 +3,17 @@ param (
 )
 
 function Get-SafeNamespaceFromPath($path, $base) {
-    $relative = $path.Replace($base, "").TrimStart('\')
+    $relative = $path.Substring($base.Length).TrimStart('\','/')
     $parts = $relative -split "[\\/]"
-    $valid = $parts | Where-Object { $_ -notmatch "bin|obj" -and $_ -notmatch "\.cs$" }
-    return "PetCarePlatform." + ($valid -join ".")
+    $validParts = $parts | Where-Object {
+        $_ -notmatch "^([a-zA-Z]:)?$" -and
+        $_ -notmatch "bin|obj|Debug|Release" -and
+        $_ -notmatch "\.cs$"
+    }
+    $cleanParts = $validParts | ForEach-Object {
+        ($_ -replace "\.cs$", "") -replace "[^a-zA-Z0-9_]", ""
+    }
+    return "PetCarePlatform." + ($cleanParts -join ".")
 }
 
 $csFiles = Get-ChildItem -Path $SolutionRoot -Recurse -Filter *.cs
@@ -28,25 +35,4 @@ foreach ($archivo in $csFiles) {
         $namespace = Get-SafeNamespaceFromPath $archivo.FullName $SolutionRoot
 
         $preservedLines = $lines | Where-Object {
-            ($_ -match "^using\s") -or ($_ -match "^
-
-\[") -or ($_ -match "//") -or ($_ -match "#")
-        }
-
-        $newContent = @()
-        $newContent += $preservedLines | Select-Object -Unique
-        $newContent += ""
-        $newContent += "namespace $namespace"
-        $newContent += "{"
-        $newContent += "    public class $className"
-        $newContent += "    {"
-        $newContent += "        // Archivo reconstruido automáticamente"
-        $newContent += "    }"
-        $newContent += "}"
-
-        Copy-Item $archivo.FullName "$($archivo.FullName).bak" -Force
-        $newContent | Set-Content $archivo.FullName -Encoding UTF8
-
-        Write-Host "Reconstruido: $($archivo.FullName)"
-    }
-}
+            ($_ -match "^using\s") -or ($_ -match "
