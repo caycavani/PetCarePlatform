@@ -1,0 +1,68 @@
+﻿using PetCare.Pets.Domain.Entities;
+using PetCare.Pets.Domain.Repositories;
+
+
+
+
+// <copyright file="RegisterPetUseCase.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+
+namespace PetCare.Pets.Application.UseCases;
+
+public class RegisterPetUseCase
+{
+    private readonly IPetRepository repository;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RegisterPetUseCase"/> class.
+    /// </summary>
+    /// <param name="repository"></param>
+    public RegisterPetUseCase(IPetRepository repository)
+    {
+        this.repository = repository;
+    }
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="species"></param>
+    /// <param name="breed"></param>
+    /// <param name="birthDate"></param>
+    /// <param name="ownerId"></param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<Guid> ExecuteAsync(string name, string species, string breed, DateTime birthDate, Guid ownerId)
+    {
+        var pet = new Pet(Guid.NewGuid(), name, species, breed, birthDate, ownerId);
+        await this.repository.AddAsync(pet);
+        return pet.Id;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

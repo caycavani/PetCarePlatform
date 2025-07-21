@@ -1,0 +1,32 @@
+﻿using Microsoft.EntityFrameworkCore;
+using PetCare.Booking.Infrastructure.Persistence;
+using PetCare.Booking.Infrastructure.Repositories;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// 🔧 Configuración de servicios
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// 🔌 Configuración de DbContext
+builder.Services.AddDbContext<ReservationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 🧩 Inyección de dependencias
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+
+var app = builder.Build();
+
+// 🚀 Middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();

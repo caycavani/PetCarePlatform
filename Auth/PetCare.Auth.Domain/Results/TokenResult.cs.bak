@@ -1,0 +1,19 @@
+namespace PetCare.Auth.Domain.Results
+}
+using System;
+namespace PetCare.Auth.Domain.Results
+{
+    public class TokenResult
+    {
+        public string Token { get; }
+        public int ExpiresIn { get; }
+        public DateTime IssuedAt { get; }
+
+        public TokenResult(string token, int expiresIn, DateTime issuedAt)
+        {
+            Token = token;
+            ExpiresIn = expiresIn;
+            IssuedAt = issuedAt;
+        }
+    }
+}

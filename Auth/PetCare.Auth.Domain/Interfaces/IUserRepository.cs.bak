@@ -1,0 +1,32 @@
+namespace PetCare.Auth.Domain.Interfaces
+using System.Threading.Tasks;
+using System;
+}
+using System.Threading.Tasks;
+namespace PetCare.Auth.Domain.Interfaces
+{
+    using PetCare.Auth.Domain.Entities;
+
+    public interface IUserRepository
+    {
+        /// <summary>
+        /// Verifica si existe un usuario con el email especificado.
+        /// </summary>
+        Task<bool> ExistsByEmailAsync(string email);
+
+        /// <summary>
+        /// Agrega un nuevo usuario a la base de datos.
+        /// </summary>
+        Task AddAsync(User user);
+
+        /// <summary>
+        /// Devuelve un usuario por su ID.
+        /// </summary>
+        Task<User?> GetByIdAsync(Guid id);
+
+        /// <summary>
+        /// Devuelve un usuario por su email.
+        /// </summary>
+        Task<User?> GetByEmailAsync(string email);
+    }
+}

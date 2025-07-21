@@ -1,0 +1,18 @@
+namespace PetCare.Auth.Application.Interfaces
+using System.Threading.Tasks;
+}
+using System.Threading.Tasks;
+namespace PetCare.Auth.Application.Interfaces
+{
+    using PetCare.Auth.Application.DTOs.User;
+    using PetCare.Auth.Domain.Entities;
+
+    public interface IUserService
+    {
+        /// <summary>
+        /// Crea un nuevo usuario en el sistema y lo persiste en base de datos.
+        /// </summary>
+        /// <param name="dto">DTO con la información del usuario</param>
+        Task<User> CreateUserAsync(CreateUserDto dto);
+    }
+}

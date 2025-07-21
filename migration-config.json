@@ -1,0 +1,44 @@
+[
+  {
+    "ServiceName": "Auth",
+    "Context": "AuthDbContext",
+    "InfraPath": "Auth\\PetCare.Auth.Infrastructure",
+    "ApiPath": "Auth\\PetCare.Auth.Api",
+    "DatabaseName": "PetCareAuthDb"
+  },
+  {
+    "ServiceName": "Pets",
+    "Context": "PetDbContext",
+    "InfraPath": "Pets\\PetCare.Pets.Infrastructure",
+    "ApiPath": "Pets\\PetCare.Pets.Api",
+    "DatabaseName": "PetCarePetsDb"
+  },
+  {
+    "ServiceName": "Review",
+    "Context": "ReviewDbContext",
+    "InfraPath": "Review\\PetCare.Review.Infrastructure",
+    "ApiPath": "Review\\PetCare.Review.Api",
+    "DatabaseName": "PetCareReviewDb"
+  },
+  {
+    "ServiceName": "Booking",
+    "Context": "ReservationDbContext",
+    "InfraPath": "Booking\\PetCare.Booking.Infrastructure",
+    "ApiPath": "Booking\\PetCare.Booking.Api",
+    "DatabaseName": "PetCareBookingDb"
+  },
+  {
+    "ServiceName": "Notification",
+    "Context": "NotificationDbContext",
+    "InfraPath": "Notification\\PetCare.Notification.Infrastructure",
+    "ApiPath": "Notification\\PetCare.Notification.Api",
+    "DatabaseName": "PetCareNotificationDb"
+  },
+  {
+    "ServiceName": "Payment",
+    "Context": "PaymentDbContext",
+    "InfraPath": "Payment\\PetCare.Payment.Infrastructure",
+    "ApiPath": "Payment\\PetCare.Payment.Api",
+    "DatabaseName": "PetCarePaymentDb"
+  }
+]

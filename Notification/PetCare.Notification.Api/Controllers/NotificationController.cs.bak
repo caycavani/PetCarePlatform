@@ -1,0 +1,65 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using PetCare.Notification.Application.UseCases;
+
+
+
+
+// <copyright file="NotificationController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+
+namespace PetCare.Notification.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class NotificationController : ControllerBase
+{
+    private readonly SendNotificationUseCase useCase;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NotificationController"/> class.
+    /// </summary>
+    /// <param name="useCase"></param>
+    public NotificationController(SendNotificationUseCase useCase)
+    {
+        this.useCase = useCase;
+    }
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] Request request)
+    {
+        var id = await this.useCase.ExecuteAsync(request.recipient, request.message);
+        return this.Ok(new { Id = id });
+    }
+    public record Request(string recipient, string message);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

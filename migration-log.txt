@@ -1,0 +1,42 @@
+
+[07/18/2025 18:30:12] Auth: Iniciado
+[07/18/2025 18:30:43] Auth: Error creando backup ()
+[07/18/2025 18:30:50] Auth: Migración aplicada
+
+[07/18/2025 18:30:50] Pets: Iniciado
+[07/18/2025 18:31:13] Pets: Error creando backup ()
+[07/18/2025 18:31:19] Pets: Migración aplicada
+
+[07/18/2025 18:31:19] Review: Iniciado
+[07/18/2025 18:31:40] Review: Error creando backup ()
+[07/18/2025 18:31:51] Review: Migración aplicada
+
+[07/18/2025 18:31:51] Booking: Iniciado
+[07/18/2025 18:32:08] Booking: Error en migración
+
+[07/18/2025 18:32:08] Notification: Iniciado
+[07/18/2025 18:32:29] Notification: Error creando backup ()
+[07/18/2025 18:32:35] Notification: Migración aplicada
+
+[07/18/2025 18:32:35] Payment: Iniciado
+[07/18/2025 18:32:44] Payment: Error creando backup ()
+[07/18/2025 18:32:50] Payment: Migración aplicada
+
+[07/18/2025 18:36:42] Auth: Iniciado
+[07/18/2025 18:36:50] Auth: Error en migración
+
+[07/18/2025 18:36:50] Pets: Iniciado
+[07/18/2025 18:36:56] Pets: Error en migración
+
+[07/18/2025 18:36:56] Review: Iniciado
+[07/18/2025 18:37:02] Review: Error en migración
+
+[07/18/2025 18:37:02] Booking: Iniciado
+[07/18/2025 18:37:23] Booking: Error creando backup ()
+[07/18/2025 18:37:30] Booking: Migración aplicada
+
+[07/18/2025 18:37:30] Notification: Iniciado
+[07/18/2025 18:37:36] Notification: Error en migración
+
+[07/18/2025 18:37:36] Payment: Iniciado
+[07/18/2025 18:37:42] Payment: Error en migración

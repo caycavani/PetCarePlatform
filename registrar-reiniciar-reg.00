@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\reiniciar]
+@="URL:Reiniciar Servicio"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\reiniciar\shell]
+
+[HKEY_CLASSES_ROOT\reiniciar\shell\open]
+
+[HKEY_CLASSES_ROOT\reiniciar\shell\open\command]
+@="\"C:\\Proyecto App Movil Cuidadores Pets\\Backend\\PetCarePlatform\\ReiniciadorLauncher.bat\" \"%1\""

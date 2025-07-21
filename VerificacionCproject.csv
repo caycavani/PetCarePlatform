@@ -1,0 +1,7 @@
+﻿Microservicio,Accion,Archivo,Detalle
+Auth,CorrecciÃ³n aplicada,PetCare.Auth.Api.csproj,"AssemblyName, RootNamespace, OutputType, TargetFramework"
+Booking,CorrecciÃ³n aplicada,PetCare.Booking.Api.csproj,"AssemblyName, RootNamespace, OutputType, TargetFramework"
+Notification,CorrecciÃ³n aplicada,PetCare.Notification.Api.csproj,"AssemblyName, RootNamespace, OutputType, TargetFramework"
+Payment,CorrecciÃ³n aplicada,PetCare.Payment.Api.csproj,"AssemblyName, RootNamespace, OutputType, TargetFramework"
+Pets,CorrecciÃ³n aplicada,PetCare.Pets.Api.csproj,"AssemblyName, RootNamespace, OutputType, TargetFramework"
+Review,CorrecciÃ³n aplicada,PetCare.Review.Api.csproj,"AssemblyName, RootNamespace, OutputType, TargetFramework"

@@ -1,0 +1,51 @@
+namespace PetCare.Review.Api.Controllers
+using System.Threading.Tasks;
+using System;
+}
+using System.Threading.Tasks;
+namespace PetCare.Review.Api.Controllers
+{
+    using Microsoft.AspNetCore.Mvc;
+    using PetCare.Review.Application.UseCases;
+    using System;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Handles HTTP requests related to reviews.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ReviewController : ControllerBase
+    {
+        private readonly SubmitReviewUseCase useCase;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReviewController"/> class.
+        /// </summary>
+        /// <param name="useCase">The use case for submitting reviews.</param>
+        public ReviewController(SubmitReviewUseCase useCase)
+        {
+            this.useCase = useCase;
+        }
+
+        /// <summary>
+        /// Submits a new review for a booking.
+        /// </summary>
+        /// <param name="request">The review submission request.</param>
+        /// <returns>A response containing the identifier of the created review.</returns>
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] SubmitReviewRequest request)
+        {
+            var id = await this.useCase.ExecuteAsync(request.bookingId, request.rating, request.comment);
+            return this.Ok(new { Id = id });
+        }
+
+        /// <summary>
+        /// Represents the request body for submitting a review.
+        /// </summary>
+        /// <param name="bookingId">The identifier of the booking being reviewed.</param>
+        /// <param name="rating">The rating given in the review.</param>
+        /// <param name="comment">The comment provided in the review.</param>
+        public record SubmitReviewRequest(Guid bookingId, int rating, string comment);
+    }
+}

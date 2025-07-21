@@ -1,0 +1,64 @@
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.MSBuild;
+using Microsoft.CodeAnalysis.CodeFixes;
+        using var workspace = MSBuildWorkspace.Create();
+
+
+
+
+
+
+
+
+
+class Program
+{
+    static int Main(string[] args)
+    {
+        if (args.Length != 1 || !File.Exists(args[0]))
+        {
+            Console.Error.WriteLine("Uso: RoslynFixer <ruta>a>TuSolucion.sln");
+            return 1;
+        }
+
+        var solutionPath = args[0];
+        Console.WriteLine($"Cargando solución {solutionPath}…");
+        var solution = workspace.OpenSolutionAsync(solutionPath).Result;
+
+        Console.WriteLine("Obteniendo Diagnósticos (solo errores)…");
+        var compilationTasks = solution.Projects
+            .Select(p => p.GetCompilationAsync())
+            .ToArray();
+
+        // Recolectamos todos los errores CS0xxx
+        var errors = compilationTasks
+            .SelectMany(t => t.Result
+                .GetDiagnostics()
+                .Where(d => d.Severity == DiagnosticSeverity.Error))
+            .ToList();
+
+        if (errors.Count == 0)
+        {
+            Console.WriteLine("No se encontraron errores.");
+            return 0;
+        }
+
+        Console.WriteLine($"Se detectaron {errors.Count} errores. Aplicando Fix-All…");
+
+        // Buscamos un CodeFixProvider genérico que soporte AddUsing
+        var fixers = CodeFixProvider.GetAllCodeFixProviders(
+            workspace.Services).ToList();
+        var csharpFixers = fixers
+            .Where(f => f.FixableDiagnosticIds
+                .Intersect(new[] { "CS0246", "CS0234", "CS0118" })
+                .Any())
+            .ToList();
+
+        if (csharpFixers.Count == 0)
+        {
+}}}

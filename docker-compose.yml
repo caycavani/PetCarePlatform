@@ -1,0 +1,118 @@
+﻿version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: petcare-db
+    environment:
+      SA_PASSWORD: "Nivacathy2033$#"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    networks:
+      - petcare-net
+
+  auth-api:
+    build:
+      context: .
+      dockerfile: Auth/Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_HTTP_PORTS=
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PetCareAuthDb;User=sa;Password=Nivacathy2033$#;
+    depends_on:
+      - sqlserver
+    networks:
+      - petcare-net
+
+  booking-api:
+    build:
+      context: .
+      dockerfile: Booking/Dockerfile
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_HTTP_PORTS=
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PetCareBookingDb;User=sa;Password=Nivacathy2033$#;
+    depends_on:
+      - sqlserver
+    networks:
+      - petcare-net
+
+  notification-api:
+    build:
+      context: .
+      dockerfile: Notification/Dockerfile
+    ports:
+      - "5003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_HTTP_PORTS=
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PetCareNotificationDb;User=sa;Password=Nivacathy2033$#;
+    depends_on:
+      - sqlserver
+    networks:
+      - petcare-net
+
+  payment-api:
+    build:
+      context: .
+      dockerfile: Payment/Dockerfile
+    ports:
+      - "5004:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_HTTP_PORTS=
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PetCarePaymentDb;User=sa;Password=Nivacathy2033$#;
+    depends_on:
+      - sqlserver
+    networks:
+      - petcare-net
+
+  pets-api:
+    build:
+      context: .
+      dockerfile: Pets/Dockerfile
+    ports:
+      - "5005:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_HTTP_PORTS=
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PetCarePetsDb;User=sa;Password=Nivacathy2033$#;
+    depends_on:
+      - sqlserver
+    networks:
+      - petcare-net
+
+  review-api:
+    build:
+      context: .
+      dockerfile: Review/Dockerfile
+    ports:
+      - "5006:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_HTTP_PORTS=
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PetCareReviewDb;User=sa;Password=Nivacathy2033$#;
+    depends_on:
+      - sqlserver
+    networks:
+      - petcare-net
+
+volumes:
+  sql_data:
+
+networks:
+  petcare-net:
+    driver: bridge

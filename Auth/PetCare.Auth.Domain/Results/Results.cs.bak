@@ -1,0 +1,25 @@
+namespace PetCare.Auth.Domain.Results
+}
+using System;
+namespace PetCare.Auth.Domain.Results
+{
+    namespace PetCare.Auth.Domain.Results
+    {
+        public class LoginResult
+        {
+            public string AccessToken { get; }
+            public string RefreshToken { get; }
+            public int ExpiresIn { get; }
+            public DateTime IssuedAt { get; }
+
+            public LoginResult(string accessToken, string refreshToken, int expiresIn, DateTime issuedAt)
+            {
+                AccessToken = accessToken;
+                RefreshToken = refreshToken;
+                ExpiresIn = expiresIn;
+                IssuedAt = issuedAt;
+            }
+        }
+    }
+
+}

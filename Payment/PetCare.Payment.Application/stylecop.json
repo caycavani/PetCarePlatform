@@ -1,0 +1,43 @@
+﻿{
+  "settings": {
+    "documentationRules": {
+      "companyName": "PetCare",
+      "documentExposedElements": true,
+      "documentInternalElements": false,
+      "documentPrivateElements": false,
+      "xmlHeader": true
+    },
+    "orderingRules": {
+      "usingDirectivesPlacement": "outsideNamespace",
+      "systemUsingDirectivesFirst": true,
+      "blankLinesBetweenUsingGroups": "require"
+    },
+    "namingRules": {
+      "includeInferredTupleElementNames": true,
+      "allowCommonHungarianPrefixes": true
+    },
+    "layoutRules": {
+      "newlineAtEndOfFile": "require"
+    },
+    "readabilityRules": {
+      "allowBuiltInTypeAliases": true,
+      "allowMembersOrdering": true
+    },
+    "maintainabilityRules": {
+      "topLevelTypes": [ "class", "interface", "enum", "struct" ]
+    },
+    "indentation": {
+      "useTabs": false,
+      "indentationSize": 4
+    },
+    "rules": {
+      "SA1101": false, // No requiere 'this.'
+      "SA1309": false, // Permite campos privados con guion bajo (_field)
+      "SA1600": false, // No exige documentación en miembros privados
+      "SA1633": true, // Requiere encabezado de copyright
+      "SA1200": true, // Usings fuera del namespace
+      "SA1210": true, // System usings primero
+      "SA1516": true // Línea en blanco entre miembros
+    }
+  }
+}

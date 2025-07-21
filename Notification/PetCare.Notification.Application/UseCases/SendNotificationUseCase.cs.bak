@@ -1,0 +1,64 @@
+﻿using PetCare.Notification.Domain.Entities;
+using PetCare.NotificationEntity.Domain.Repositories;
+
+
+
+
+// <copyright file="SendNotificationUseCase.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+
+namespace PetCare.Notification.Application.UseCases;
+
+public class SendNotificationUseCase
+{
+    private readonly INotificationRepository repository;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SendNotificationUseCase"/> class.
+    /// </summary>
+    /// <param name="repository"></param>
+    public SendNotificationUseCase(INotificationRepository repository)
+    {
+        this.repository = repository;
+    }
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="recipient"></param>
+    /// <param name="message"></param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<Guid> ExecuteAsync(string recipient, string message)
+    {
+        // Ensure the correct namespace and type are used for Notification
+        var notification = new PetCare.Notification.Domain.Entities.Notification(Guid.NewGuid(), recipient, message, DateTime.UtcNow);
+        await this.repository.AddAsync(notification);
+        return notification.Id;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

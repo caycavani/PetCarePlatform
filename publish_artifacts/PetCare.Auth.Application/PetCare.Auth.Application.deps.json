@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "PetCare.Auth.Application/1.0.0": {
+        "dependencies": {
+          "PetCare.Auth.Domain": "1.0.0"
+        },
+        "runtime": {
+          "PetCare.Auth.Application.dll": {}
+        }
+      },
+      "PetCare.Auth.Domain/1.0.0": {
+        "runtime": {
+          "PetCare.Auth.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "PetCare.Auth.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "PetCare.Auth.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

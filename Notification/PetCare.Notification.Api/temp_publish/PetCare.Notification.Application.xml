@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PetCare.Notification.Application</name>
+    </assembly>
+    <members>
+        <member name="T:PetCare.Notification.Application.UseCases.SendNotificationUseCase">
+            <summary>
+            Caso de uso para enviar una notificación a un destinatario.
+            </summary>
+        </member>
+        <member name="M:PetCare.Notification.Application.UseCases.SendNotificationUseCase.#ctor(PetCare.Notification.Domain.Repositories.INotificationRepository)">
+            <summary>
+            Inicializa una nueva instancia de la clase <see cref="T:PetCare.Notification.Application.UseCases.SendNotificationUseCase"/>.
+            </summary>
+            <param name="repository">Repositorio de notificaciones.</param>
+        </member>
+        <member name="M:PetCare.Notification.Application.UseCases.SendNotificationUseCase.ExecuteAsync(System.Guid,System.String,System.String)">
+            <summary>
+            Envía una notificación asincrónicamente a un destinatario.
+            </summary>
+            <param name="recipientId">Identificador del destinatario.</param>
+            <param name="message">Contenido del mensaje.</param>
+            <param name="type">Tipo de notificación.</param>
+            <returns>El identificador único de la notificación creada.</returns>
+        </member>
+    </members>
+</doc>

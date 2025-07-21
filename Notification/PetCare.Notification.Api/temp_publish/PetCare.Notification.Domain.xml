@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PetCare.Notification.Domain</name>
+    </assembly>
+    <members>
+        <member name="T:PetCare.Notification.Domain.Entities.NotificationEntity">
+            <summary>
+            Representa una notificación enviada a un usuario.
+            </summary>
+        </member>
+        <member name="M:PetCare.Notification.Domain.Entities.NotificationEntity.#ctor(System.Guid,System.Guid,System.String,System.DateTime,System.String)">
+            <summary>
+            Inicializa una nueva instancia de la clase <see cref="T:PetCare.Notification.Domain.Entities.NotificationEntity"/>.
+            </summary>
+            <param name="id">Identificador único de la notificación.</param>
+            <param name="recipientId">Identificador del destinatario.</param>
+            <param name="message">Contenido del mensaje.</param>
+            <param name="sentAt">Fecha de envío.</param>
+            <param name="type">Tipo de notificación.</param>
+        </member>
+        <member name="P:PetCare.Notification.Domain.Entities.NotificationEntity.Id">
+            <summary>
+            Obtiene el identificador único de la notificación.
+            </summary>
+        </member>
+        <member name="P:PetCare.Notification.Domain.Entities.NotificationEntity.RecipientId">
+            <summary>
+            Obtiene el identificador del destinatario.
+            </summary>
+        </member>
+        <member name="P:PetCare.Notification.Domain.Entities.NotificationEntity.Message">
+            <summary>
+            Obtiene el contenido del mensaje.
+            </summary>
+        </member>
+        <member name="P:PetCare.Notification.Domain.Entities.NotificationEntity.SentAt">
+            <summary>
+            Obtiene la fecha y hora en que se envió la notificación.
+            </summary>
+        </member>
+        <member name="P:PetCare.Notification.Domain.Entities.NotificationEntity.Type">
+            <summary>
+            Obtiene el tipo de notificación.
+            </summary>
+        </member>
+        <member name="T:PetCare.Notification.Domain.Models.NotificationModel">
+            <summary>
+            Represents a data transfer model for notifications.
+            </summary>
+        </member>
+        <member name="P:PetCare.Notification.Domain.Models.NotificationModel.Id">
+            <summary>
+            Gets or sets the unique identifier of the notification.
+            </summary>
+        </member>
+        <member name="P:PetCare.Notification.Domain.Models.NotificationModel.Recipient">
+            <summary>
+            Gets or sets the recipient of the notification.
+            </summary>
+        </member>
+        <member name="P:PetCare.Notification.Domain.Models.NotificationModel.Message">
+            <summary>
+            Gets or sets the message content of the notification.
+            </summary>
+        </member>
+        <member name="P:PetCare.Notification.Domain.Models.NotificationModel.SentAt">
+            <summary>
+            Gets or sets the date and time the notification was sent.
+            </summary>
+        </member>
+        <member name="T:PetCare.Notification.Domain.Repositories.INotificationRepository">
+            <summary>
+            Contrato para persistencia de notificaciones.
+            </summary>
+        </member>
+        <member name="M:PetCare.Notification.Domain.Repositories.INotificationRepository.AddAsync(PetCare.Notification.Domain.Entities.NotificationEntity)">
+            <summary>
+            Agrega una nueva notificación al repositorio.
+            </summary>
+            <param name="notification">La notificación a agregar.</param>
+            <returns>Una tarea asincrónica.</returns>
+        </member>
+        <member name="M:PetCare.Notification.Domain.Repositories.INotificationRepository.GetByIdAsync(System.Guid)">
+            <summary>
+            Obtiene una notificación por su identificador.
+            </summary>
+        </member>
+        <member name="M:PetCare.Notification.Domain.Repositories.INotificationRepository.GetAllAsync">
+            <summary>
+            Lista todas las notificaciones registradas.
+            </summary>
+        </member>
+    </members>
+</doc>
