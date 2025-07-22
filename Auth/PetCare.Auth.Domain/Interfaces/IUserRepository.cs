@@ -14,5 +14,7 @@ namespace PetCare.Auth.Domain.Interfaces
         Task UpdateAsync(User user);
         Task DeleteAsync(Guid id);
         Task<bool> ExistsAsync(string email);
+        Task<User?> GetByUsernameAsync(string username);
+
     }
 }

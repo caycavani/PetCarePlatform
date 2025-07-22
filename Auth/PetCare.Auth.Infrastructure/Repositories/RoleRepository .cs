@@ -1,13 +1,15 @@
-using Microsoft.EntityFrameworkCore;
-using PetCare.Auth.Domain.Entities;
-using PetCare.Auth.Domain.Interfaces;
-using PetCare.Auth.Infrastructure.Persistence;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
 namespace PetCare.Auth.Infrastructure.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using System.Xml.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using PetCare.Auth.Application.Interfaces;
+    using PetCare.Auth.Domain.Entities;
+    using PetCare.Auth.Domain.Interfaces;
+    using PetCare.Auth.Infrastructure.Persistence;
+
     public class RoleRepository : IRoleRepository
     {
         private readonly AuthDbContext _context;
@@ -24,39 +26,48 @@ namespace PetCare.Auth.Infrastructure.Repositories
 
         public async Task<Role?> GetByIdAsync(Guid id)
         {
-            return await _context.Roles.FindAsync(id);
+            return await _context.Roles
+                .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task<Role?> GetByNameAsync(string name)
         {
-            return await _context.Roles.FirstOrDefaultAsync(r => r.Name == name);
+            var normalized = name?.Trim().ToUpper();
+            return await _context.Roles
+                .FirstOrDefaultAsync(r => r.NormalizedName == normalized);
+        }
+
+        public async Task<bool> ExistsAsync(string name)
+        {
+            var normalized = name?.Trim().ToUpper();
+            return await _context.Roles.AnyAsync(r => r.NormalizedName == normalized);
         }
 
         public async Task AddAsync(Role role)
         {
-            _context.Roles.Add(role);
+            await _context.Roles.AddAsync(role);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Role role)
         {
-            _context.Roles.Update(role);
-            await _context.SaveChangesAsync();
+            var existingRole = await GetByIdAsync(role.Id);
+            if (existingRole is not null)
+            {
+                existingRole.Rename(role.Name);
+                _context.Roles.Update(existingRole);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task DeleteAsync(Guid id)
         {
             var role = await GetByIdAsync(id);
-            if (role != null)
+            if (role is not null)
             {
                 _context.Roles.Remove(role);
                 await _context.SaveChangesAsync();
             }
-        }
-
-        public async Task<bool> ExistsAsync(string name)
-        {
-            return await _context.Roles.AnyAsync(r => r.Name == name);
         }
     }
 }

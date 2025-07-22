@@ -16,7 +16,7 @@ namespace PetCare.Auth.Infrastructure.Persistence
                    .Build();
 
             var options = new DbContextOptionsBuilder<AuthDbContext>();
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection"));
+            options.UseSqlServer(config.GetConnectionString("AuthDatabase"));
 
             return new AuthDbContext(options.Options);
         }

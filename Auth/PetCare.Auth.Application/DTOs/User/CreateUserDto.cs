@@ -4,6 +4,10 @@ namespace PetCare.Auth.Application.DTOs.User
 {
     public class CreateUserDto
     {
+        [Required(ErrorMessage = "El nombre de usuario es obligatorio.")]
+        [StringLength(50, ErrorMessage = "El nombre de usuario no debe exceder los 50 caracteres.")]
+        public string Username { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "El correo es obligatorio.")]
         [EmailAddress(ErrorMessage = "El correo no tiene un formato válido.")]
         [StringLength(100, ErrorMessage = "El correo no debe exceder los 100 caracteres.")]
@@ -21,5 +25,9 @@ namespace PetCare.Auth.Application.DTOs.User
         [Phone(ErrorMessage = "El formato del teléfono no es válido.")]
         [StringLength(20, ErrorMessage = "El teléfono no debe exceder los 20 caracteres.")]
         public string Phone { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El rol es obligatorio.")]
+        [StringLength(30, ErrorMessage = "El rol no debe exceder los 30 caracteres.")]
+        public string Role { get; set; } = "user";
     }
 }

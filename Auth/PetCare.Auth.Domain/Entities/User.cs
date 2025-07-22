@@ -1,4 +1,6 @@
 ﻿using System;
+using BCrypt.Net;
+using PetCare.Auth.Domain.Entities;
 
 namespace PetCare.Auth.Domain.Entities
 {
@@ -8,32 +10,33 @@ namespace PetCare.Auth.Domain.Entities
 
         public string Email { get; private set; } = string.Empty;
         public string PasswordHash { get; private set; } = string.Empty;
+        public string Username { get; private set; } = string.Empty;
         public string FullName { get; private set; } = string.Empty;
         public string Phone { get; private set; } = string.Empty;
 
         public bool IsActive { get; private set; } = true;
+        public DateTime CreatedAt { get; private set; }
 
-        // 🏷️ Relación con Rol
+        // 🔗 Relación con Rol
         public Guid RoleId { get; private set; }
         public Role Role { get; private set; } = default!;
 
-        public DateTime CreatedAt { get; private set; }
-
-        // 📦 Constructor protegido para EF Core
+        // 🔐 Constructor protegido para EF Core
         protected User() { }
 
-        public User(Guid id, string email, string passwordHash, string fullName, string phone)
+        public User(Guid id, string email, string passwordHash, string fullName, string phone, string username)
         {
             Id = id;
             Email = email;
             PasswordHash = passwordHash;
             FullName = fullName;
             Phone = phone;
+            Username = username;
             IsActive = true;
             CreatedAt = DateTime.UtcNow;
         }
 
-        // 🛠️ Métodos de negocio
+        // 🛠️ Asignar rol
         public void AssignRole(Role role)
         {
             if (role is null)
@@ -43,18 +46,29 @@ namespace PetCare.Auth.Domain.Entities
             RoleId = role.Id;
         }
 
-        public void SetPasswordHash(string hash)
+        // 🔐 Establecer contraseña con hash seguro
+        public void SetPassword(string plainPassword)
         {
-            PasswordHash = hash;
+            if (string.IsNullOrWhiteSpace(plainPassword))
+                throw new ArgumentException("La contraseña no puede estar vacía.");
+
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(plainPassword);
         }
 
+        // 🔐 Verificar contraseña
+        public bool VerifyPassword(string input)
+        {
+            return BCrypt.Net.BCrypt.Verify(input, PasswordHash);
+        }
 
+        // 📞 Actualizar perfil
         public void UpdateProfile(string fullName, string phone)
         {
             FullName = fullName;
             Phone = phone;
         }
 
+        // 🚫 Desactivar cuenta
         public void Deactivate()
         {
             IsActive = false;

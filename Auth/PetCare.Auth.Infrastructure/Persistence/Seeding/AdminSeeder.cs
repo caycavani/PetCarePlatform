@@ -36,14 +36,15 @@
                 "admin@pets.com",
                 "", // password temporal
                 "Administrador Principal",
-                "+57 000 000 0000"
+                "+57 000 000 0000",
+                "admin@pets.com"
             );
 
             admin.AssignRole(role);
 
             // Asignación segura de contraseña
             var hash = _passwordHasher.HashPassword(admin, "123456");
-            admin.SetPasswordHash(hash); // 👈 Este método debe existir como público o interno en User
+           // admin.SetPasswordHash(hash); // 👈 Este método debe existir como público o interno en User
 
             await _userRepository.AddAsync(admin);
         }

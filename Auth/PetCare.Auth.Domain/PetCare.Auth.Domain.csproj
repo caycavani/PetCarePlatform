@@ -7,6 +7,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+  </ItemGroup>
+
   <!-- Este proyecto contiene entidades, interfaces, reglas de negocio puras -->
 
 </Project>

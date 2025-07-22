@@ -1,62 +1,66 @@
-﻿using PetCare.Auth.Application.Interfaces;
-using PetCare.Auth.Domain.Entities;
-using PetCare.Auth.Domain.Exceptions;
-using PetCare.Auth.Domain.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PetCare.Auth.Domain.Entities;
+using PetCare.Auth.Domain.Interfaces;
+using PetCare.Auth.Application.Interfaces;
+using PetCare.Auth.Application.DTOs.Roles;
 
 namespace PetCare.Auth.Application.Services
 {
     public class RoleService : IRoleService
     {
-        private readonly IRoleRepository _roleRepository;
+        private readonly IRoleRepository _repository;
 
-        public RoleService(IRoleRepository roleRepository)
+        public RoleService(IRoleRepository repository)
         {
-            _roleRepository = roleRepository;
+            _repository = repository;
         }
 
         public async Task<List<Role>> GetAllAsync()
         {
-            return await _roleRepository.GetAllAsync();
+            return await _repository.GetAllAsync();
         }
 
         public async Task<Role?> GetByIdAsync(Guid id)
         {
-            return await _roleRepository.GetByIdAsync(id);
+            return await _repository.GetByIdAsync(id);
         }
 
-        public async Task<Role?> GetByNameAsync(string name)
+        public async Task<Guid> CreateAsync(CreateRoleDto dto)
         {
-            return await _roleRepository.GetByNameAsync(name.ToLower());
-        }
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("El nombre del rol no puede estar vacío.");
 
-        public async Task CreateAsync(string name, string description)
-        {
-            if (await _roleRepository.GetByNameAsync(name.ToLower()) is not null)
+            var exists = await _repository.ExistsAsync(dto.Name);
+            if (exists)
                 throw new InvalidOperationException("Ya existe un rol con ese nombre.");
 
-            var role = new Role(name);
-            await _roleRepository.AddAsync(role);
+            var role = new Role(dto.Name);
+            await _repository.AddAsync(role);
+            return role.Id;
         }
 
-        public async Task UpdateAsync(Guid id, string name, string description)
+        public async Task UpdateAsync(Guid id, CreateRoleDto dto)
         {
-            var role = await _roleRepository.GetByIdAsync(id)
-                        ?? throw new RoleNotFoundException(id);
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("El nombre del rol no puede estar vacío.");
 
-            role.Rename(name); // Este método debería existir en tu entidad Role
+            var role = await _repository.GetByIdAsync(id);
+            if (role is null)
+                throw new KeyNotFoundException("No se encontró el rol para actualizar.");
 
-            await _roleRepository.UpdateAsync(role);
+            role.Rename(dto.Name);
+            await _repository.UpdateAsync(role);
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var role = await _roleRepository.GetByIdAsync(id)
-                        ?? throw new RoleNotFoundException(id);
+            var role = await _repository.GetByIdAsync(id);
+            if (role is null)
+                throw new KeyNotFoundException("No se encontró el rol para eliminar.");
 
-            await _roleRepository.DeleteAsync(role.Id);
+            await _repository.DeleteAsync(id);
         }
     }
 }

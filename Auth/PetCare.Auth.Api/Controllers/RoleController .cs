@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PetCare.Auth.Api.Models;
+using PetCare.Auth.Application.DTOs.Roles;
 using PetCare.Auth.Application.Interfaces;
 using System;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace PetCare.Auth.Api.Controllers
 {
     [ApiController]
-    [Route("api/roles")]
+    [Route("api/auth/roles")]
     public class RoleController : ControllerBase
     {
         private readonly IRoleService _roleService;
@@ -26,43 +27,49 @@ namespace PetCare.Auth.Api.Controllers
             return Ok(roles);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var role = await _roleService.GetByIdAsync(id);
+            if (role == null)
+                return NotFound();
+
             return Ok(role);
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Create([FromBody] CreateRoleRequest request)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateRoleDto request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            await _roleService.CreateAsync(request.Name, request.Description);
-            return Created("", null);
+            var newRoleId = await _roleService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = newRoleId }, null);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] CreateRoleRequest request)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] CreateRoleDto request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            await _roleService.UpdateAsync(id, request.Name, request.Description);
+            await _roleService.UpdateAsync(id, request);
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+
+        [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id)
         {
+            var exists = await _roleService.GetByIdAsync(id);
+            if (exists == null)
+                return NotFound();
+
             await _roleService.DeleteAsync(id);
             return NoContent();
         }

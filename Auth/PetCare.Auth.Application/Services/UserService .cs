@@ -40,7 +40,7 @@ namespace PetCare.Auth.Application.Services
 
             var hashedPassword = Hash(dto.Password);
 
-            var user = new User(Guid.NewGuid(), dto.Email, hashedPassword, dto.FullName, dto.Phone);
+            var user = new User(Guid.NewGuid(), dto.Email, hashedPassword, dto.FullName, dto.Phone,dto.Username);
             user.AssignRole(role);
 
             await _userRepository.AddAsync(user);

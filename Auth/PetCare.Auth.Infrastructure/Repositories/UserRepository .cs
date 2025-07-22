@@ -58,5 +58,12 @@ namespace PetCare.Auth.Infrastructure.Repositories
         {
             return await _context.Users.AnyAsync(u => u.Email == email);
         }
+
+        public async Task<User?> GetByUsernameAsync(string username)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+        }
+
     }
 }

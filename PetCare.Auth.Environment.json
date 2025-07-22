@@ -1,0 +1,35 @@
+{
+  "id": "7bdf2e85-0000-4000-a7d1-auth-env001",
+  "name": "PetCare.Auth.Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5079",
+      "enabled": true
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "role_id",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "enabled": true
+    }
+  ],
+  "timestamp": 1699999999999,
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2025-07-22T15:55:00.000Z",
+  "_postman_exported_using": "Postman/10.20.5"
+}

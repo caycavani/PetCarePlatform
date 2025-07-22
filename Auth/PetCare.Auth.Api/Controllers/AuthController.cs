@@ -17,17 +17,17 @@ namespace PetCare.Auth.Api.Controllers
         }
 
         /// <summary>
-        /// Registra un nuevo usuario con el rol especificado.
+        /// Registra un nuevo usuario con el rol incluido en el cuerpo.
         /// </summary>
         [HttpPost("register")]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Register([FromBody] CreateUserDto dto, [FromQuery] string role = "user")
+        public async Task<IActionResult> Register([FromBody] CreateUserDto dto)
         {
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-            await _authService.RegisterAsync(dto, role);
-            return Ok(new { Message = "Usuario registrado exitosamente." });
+            await _authService.RegisterAsync(dto, dto.Role);
+            return StatusCode(201, new { Message = "Usuario registrado exitosamente." });
         }
 
         /// <summary>
@@ -73,7 +73,5 @@ namespace PetCare.Auth.Api.Controllers
                 return Unauthorized(ex.Message);
             }
         }
-
-
     }
 }

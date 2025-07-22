@@ -21,5 +21,8 @@ namespace PetCare.Auth.Application.Interfaces
         /// Registra un usuario nuevo con rol inicial.
         /// </summary>
         Task RegisterAsync(CreateUserDto dto, string roleName);
+
+        /// <summary>
+        Task UpdateProfileAsync(Guid userId, UpdateProfileDto dto);
     }
 }

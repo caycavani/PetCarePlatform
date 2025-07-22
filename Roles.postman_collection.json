@@ -1,0 +1,88 @@
+{
+  "info": {
+    "name": "PetCare Roles",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Roles",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/roles",
+          "host": ["{{base_url}}"],
+          "path": ["api", "roles"]
+        }
+      }
+    },
+    {
+      "name": "Get Role by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/roles/{{role_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "roles", "{{role_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Create Role",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/roles",
+          "host": ["{{base_url}}"],
+          "path": ["api", "roles"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"CUIDADOR\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Update Role",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/roles/{{role_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "roles", "{{role_id}}"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"CLIENTE\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Delete Role",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/roles/{{role_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "roles", "{{role_id}}"]
+        }
+      }
+    }
+  ]
+}
