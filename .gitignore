@@ -31,3 +31,4 @@ migration-log.txt
 # Node & frontend (por si integras SPA o Blazor)
 node_modules/
 dist/
+/Booking/PetCare.Booking.Domain/Entities/ReservationStatus.cs
