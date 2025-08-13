@@ -1,0 +1,69 @@
+# 📦 Imagen base
+FROM mcr.microsoft.com/dotnet/sdk:8.0.100
+
+# 🛠 Directorio de trabajo
+WORKDIR /app
+
+# ⚙️ Variables de entorno
+ENV DOTNET_CLI_HOME=/tmp
+ENV DOTNET_ROOT=/usr/share/dotnet
+ENV PATH="${PATH}:/opt/mssql-tools/bin"
+
+# 🔧 Dependencias base
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        gnupg \
+        libicu-dev \
+        zlib1g \
+        libssl-dev \
+        netcat-openbsd \
+        iputils-ping \
+        apt-transport-https \
+        unixodbc \
+        libunwind8 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# 📁 Copiar módulos desde raíz (ajuste importante)
+COPY Auth /app/Auth
+COPY Pets /app/Pets
+COPY Booking /app/Booking
+COPY Review /app/Review
+COPY Notification /app/Notification
+COPY Payment /app/Payment
+COPY scripts/validate-sql.sh /tools/validate-sql.sh
+
+# 🧰 dotnet-ef
+RUN dotnet new tool-manifest --force && \
+    dotnet tool install dotnet-ef --version 8.0.5 && \
+    dotnet tool restore && \
+    dotnet tool run dotnet-ef --version
+
+# 🧪 Validaciones y migraciones
+CMD ["bash", "-c", "\
+  echo '🧪 Validando conexión con SQL Server...' && \
+  /tools/validate-sql.sh || { echo '❌ No se pudo establecer conexión con SQL Server'; exit 1; } && \
+  echo '🔍 Verificando archivos .csproj...' && \
+  find /app -name '*.csproj' || { echo '❌ No se encontraron archivos .csproj'; exit 1; } && \
+  echo '✅ Archivos .csproj encontrados. Iniciando migraciones...' && \
+  dotnet tool run dotnet-ef database update --context AuthDbContext \
+    --project /app/Auth/PetCare.Auth.Infrastructure \
+    --startup-project /app/Auth/PetCare.Auth.Api || exit 1; \
+  dotnet tool run dotnet-ef database update --context PetDbContext \
+    --project /app/Pets/PetCare.Pets.Infrastructure \
+    --startup-project /app/Pets/PetCare.Pets.Api || exit 1; \
+  dotnet tool run dotnet-ef database update --context ReservationDbContext \
+    --project /app/Booking/PetCare.Booking.Infrastructure \
+    --startup-project /app/Booking/PetCare.Booking.Api || exit 1; \
+  dotnet tool run dotnet-ef database update \
+    --project /app/Review/PetCare.Review.Infrastructure \
+    --startup-project /app/Review/PetCare.Review.Api || exit 1; \
+  dotnet tool run dotnet-ef database update \
+    --project /app/Notification/PetCare.Notification.Infrastructure \
+    --startup-project /app/Notification/PetCare.Notification.Api || exit 1; \
+  dotnet tool run dotnet-ef database update \
+    --project /app/Payment/PetCare.Payment.Infrastructure \
+    --startup-project /app/Payment/PetCare.Payment.Api || exit 1; \
+  echo '✅ Migraciones finalizadas.' \
+"]

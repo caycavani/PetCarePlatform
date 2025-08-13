@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>PetCare.Auth.Application</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Referencia al proyecto Domain -->
+    <!-- Referencia al proyecto Domain (correctamente como ProjectReference) -->
     <ProjectReference Include="..\PetCare.Auth.Domain\PetCare.Auth.Domain.csproj" />
   </ItemGroup>
 

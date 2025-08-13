@@ -1,23 +1,36 @@
 ﻿namespace PetCare.Booking.Application.UseCases
 {
+    using System;
     using System.Threading.Tasks;
     using PetCare.Booking.Application.DTOs;
     using PetCare.Booking.Domain.Entities;
+    using PetCare.Booking.Domain.Interfaces;
 
     public class CreateReservationUseCase
     {
-        private readonly IReservationRepository _bookingRepository;
+        private readonly IReservationRepository _reservationRepository;
 
-        public CreateReservationUseCase(IReservationRepository bookingRepository)
+        public CreateReservationUseCase(IReservationRepository reservationRepository)
         {
-            _bookingRepository = bookingRepository;
+            _reservationRepository = reservationRepository;
         }
 
         public async Task<Guid> ExecuteAsync(CreateReservationDto dto)
         {
-            var booking = new Reservation(dto.PetId, dto.CaregiverId, dto.StartDate, dto.EndDate);
-            await _bookingRepository.AddAsync(booking);
-            return booking.Id;
+            var reservation = new Reservation(
+                Guid.NewGuid(),             // id
+                dto.ClientId,               // clientId
+                dto.CaregiverId,            // caregiverId
+                dto.PetId,                  // petId
+                dto.StartDate,              // startDate
+                dto.EndDate,                // endDate
+                dto.Note                    // note
+            );
+
+            reservation.UpdateStatus(1); // 1 = Estado pendiente
+
+            var created = await _reservationRepository.CreateAsync(reservation);
+            return created ? reservation.Id : Guid.Empty;
         }
     }
 }

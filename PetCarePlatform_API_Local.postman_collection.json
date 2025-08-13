@@ -1,0 +1,215 @@
+{
+  "info": {
+    "name": "PetCarePlatform API (Local)",
+    "_postman_id": "e6f1f918-b037-4f60-ae68-000000000000",
+    "description": "Colección local para probar los microservicios Auth y Booking con JWT.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@email.com\",\n  \"password\": \"claveSegura\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/auth/login",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.environment.set(\"access_token\", res.accessToken);",
+                  "pm.environment.set(\"user_id\", res.userId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Booking",
+      "item": [
+        {
+          "name": "Crear reserva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petId\": \"{{pet_id}}\",\n  \"caregiverId\": \"{{caregiver_id}}\",\n  \"startDate\": \"2025-08-01T10:00:00\",\n  \"endDate\": \"2025-08-03T18:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{booking_url}}/api/reservation",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mis reservas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{booking_url}}/api/reservation/my",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation",
+                "my"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{booking_url}}/api/reservation/{{reservation_id}}",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation",
+                "{{reservation_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Aceptar reserva",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{booking_url}}/api/reservation/{{reservation_id}}/accept",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation",
+                "{{reservation_id}}",
+                "accept"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Rechazar reserva",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{booking_url}}/api/reservation/{{reservation_id}}/reject",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation",
+                "{{reservation_id}}",
+                "reject"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancelar reserva",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{booking_url}}/api/reservation/{{reservation_id}}/cancel",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation",
+                "{{reservation_id}}",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

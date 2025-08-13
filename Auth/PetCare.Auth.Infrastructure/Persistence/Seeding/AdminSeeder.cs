@@ -1,11 +1,11 @@
-﻿namespace PetCare.Auth.Infrastructure.Seeding
-{
-    using System;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Identity;
-    using PetCare.Auth.Domain.Entities;
-    using PetCare.Auth.Domain.Interfaces;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using PetCare.Auth.Domain.Entities;
+using PetCare.Auth.Domain.Interfaces;
 
+namespace PetCare.Auth.Infrastructure.Seeding
+{
     public class AdminSeeder
     {
         private readonly IUserRepository _userRepository;
@@ -31,20 +31,25 @@
             if (role is null)
                 throw new InvalidOperationException("El rol 'admin' no existe.");
 
+            // Contraseña temporal
+            var tempPassword = "123456";
+
+            // Usuario administrador
             var admin = new User(
-                Guid.NewGuid(),
-                "admin@pets.com",
-                "", // password temporal
-                "Administrador Principal",
-                "+57 000 000 0000",
-                "admin@pets.com"
+                email: "admin@pets.com",
+                passwordHash: "", // Se establecerá después
+                username: "admin",
+                fullName: "Administrador Principal",
+                phone: "+57 000 000 0000",
+                roleId: role.Id
             );
 
+            // Asignación de rol con navegación
             admin.AssignRole(role);
 
             // Asignación segura de contraseña
-            var hash = _passwordHasher.HashPassword(admin, "123456");
-           // admin.SetPasswordHash(hash); // 👈 Este método debe existir como público o interno en User
+            var hashedPassword = _passwordHasher.HashPassword(admin, tempPassword);
+            admin.SetPassword(hashedPassword);
 
             await _userRepository.AddAsync(admin);
         }

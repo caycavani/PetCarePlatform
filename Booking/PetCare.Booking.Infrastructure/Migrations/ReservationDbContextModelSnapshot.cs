@@ -17,7 +17,7 @@ namespace PetCare.Booking.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -31,23 +31,157 @@ namespace PetCare.Booking.Infrastructure.Migrations
                     b.Property<Guid>("CaregiverId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<Guid>("PetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ReservationStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ServiceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ReservationStatusId");
+
+                    b.HasIndex("ServiceId");
+
                     b.ToTable("Reservations", (string)null);
+                });
+
+            modelBuilder.Entity("PetCare.Booking.Domain.Entities.ReservationStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ColorHex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReservationStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ColorHex = "#ffc107",
+                            DisplayName = "Pendiente",
+                            Name = "Pending"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ColorHex = "#28a745",
+                            DisplayName = "Aceptada",
+                            Name = "Accepted"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ColorHex = "#dc3545",
+                            DisplayName = "Rechazada",
+                            Name = "Rejected"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ColorHex = "#6c757d",
+                            DisplayName = "Cancelada",
+                            Name = "Cancelled"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ColorHex = "#007bff",
+                            DisplayName = "Completada",
+                            Name = "Completed"
+                        });
+                });
+
+            modelBuilder.Entity("PetCare.Booking.Domain.Entities.Service", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CaregiverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Services", (string)null);
+                });
+
+            modelBuilder.Entity("PetCare.Booking.Domain.Entities.Reservation", b =>
+                {
+                    b.HasOne("PetCare.Booking.Domain.Entities.ReservationStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("ReservationStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetCare.Booking.Domain.Entities.Service", "Service")
+                        .WithMany("Reservations")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Service");
+
+                    b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("PetCare.Booking.Domain.Entities.Service", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

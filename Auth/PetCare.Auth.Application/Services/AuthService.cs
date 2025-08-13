@@ -40,27 +40,29 @@ namespace PetCare.Auth.Application.Services
             if (dto is null)
                 throw new ArgumentNullException(nameof(dto));
 
-            var email = dto.Email?.Trim().ToLower();
+            var email = dto.Email?.Trim().ToLowerInvariant();
             if (await _userRepository.ExistsAsync(email))
                 throw new InvalidOperationException("El correo ya está en uso.");
 
-            var normalizedRole = roleName?.Trim().ToUpper();
-            var role = await _roleRepository.GetByNameAsync(normalizedRole);
+            var normalizedRole = roleName?.Trim().ToUpperInvariant();
+            var role = await _roleRepository.GetByNormalizedNameAsync(normalizedRole);
             if (role is null)
                 throw new InvalidOperationException("El rol especificado no existe.");
 
             var hashedPassword = Hash(dto.Password);
 
             var user = new User(
-                Guid.NewGuid(),
-                email!,
+                dto.Email!,
                 hashedPassword,
-                dto.FullName,
-                dto.Phone,
-                dto.Username
+               dto.Username,
+               dto.FullName,
+               dto.Phone,
+               role.Id
             );
 
             user.AssignRole(role);
+            user.SetPassword(hashedPassword);
+
             await _userRepository.AddAsync(user);
         }
 
@@ -69,7 +71,7 @@ namespace PetCare.Auth.Application.Services
             if (dto is null)
                 throw new ArgumentNullException(nameof(dto));
 
-            var identifier = dto.Identifier?.Trim().ToLower();
+            var identifier = dto.Identifier?.Trim().ToLowerInvariant();
             if (string.IsNullOrWhiteSpace(identifier))
                 throw new UnauthorizedAccessException("Debe proporcionar un correo o usuario.");
 
@@ -127,11 +129,11 @@ namespace PetCare.Auth.Application.Services
         {
             var claims = new[]
             {
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-        new Claim(ClaimTypes.Name, user.Username),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, user.Role?.Name ?? "CLIENTE") // Ajusta si el rol está asignado
-    };
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role?.Name ?? "CLIENTE")
+            };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Secret"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -155,7 +157,6 @@ namespace PetCare.Auth.Application.Services
             user.UpdateProfile(dto.FullName, dto.Phone);
             await _userRepository.UpdateAsync(user);
         }
-
 
         private string GenerateRefreshToken()
         {

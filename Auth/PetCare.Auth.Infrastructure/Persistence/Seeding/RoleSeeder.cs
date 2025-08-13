@@ -20,10 +20,15 @@ namespace PetCare.Auth.Infrastructure.Persistence.Seeding
 
             foreach (var roleName in baseRoles)
             {
-                var existing = await _roleRepository.GetByNameAsync(roleName);
+                var normalizedName = roleName.Trim().ToUpperInvariant();
+                var existing = await _roleRepository.GetByNameAsync(normalizedName);
+
                 if (existing is null)
                 {
-                    var role = new Role(roleName);
+                    var role = new Role(roleName)
+                    {
+                        NormalizedName = normalizedName,
+                    };
 
                     await _roleRepository.AddAsync(role);
                 }

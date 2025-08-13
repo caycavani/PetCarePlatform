@@ -20,6 +20,12 @@ RUN dotnet publish PetCare.Auth.Api.csproj -c Release -o /app/publish
 # Etapa final: imagen de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+
+# 🛠 Instalar librería requerida por SQL Server
+RUN apt-get update && apt-get install -y libgssapi-krb5-2
+
+# Copiar artefactos publicados
 COPY --from=build /app/publish .
+
 ENV ASPNETCORE_URLS=http://+:80
 ENTRYPOINT ["dotnet", "PetCare.Auth.Api.dll"]

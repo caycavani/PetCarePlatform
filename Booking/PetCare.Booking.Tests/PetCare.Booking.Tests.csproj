@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <!-- Correcto: no uses net8.0.5 -->
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Útil para simplificar código de pruebas -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>PetCare.Booking.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Framework de test y utilidades -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.5" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="NUnit" Version="4.3.2" />
+    <PackageReference Include="xunit" Version="2.4.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
+    <PackageReference Include="FluentAssertions" Version="6.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.0" />
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Moq" Version="4.20.62" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Referencias correctas a proyectos Auth -->
+    <ProjectReference Include="..\..\Auth\PetCare.Auth.Api\PetCare.Auth.Api.csproj" />
+    <ProjectReference Include="..\..\Auth\PetCare.Auth.Application\PetCare.Auth.Application.csproj" />
+    <ProjectReference Include="..\..\Auth\PetCare.Auth.Domain\PetCare.Auth.Domain.csproj" />
+    <ProjectReference Include="..\..\Auth\PetCare.Auth.Infrastructure\PetCare.Auth.Infrastructure.csproj" />
+
+    <!-- Booking Application -->
+    <ProjectReference Include="..\PetCare.Booking.Application\PetCare.Booking.Application.csproj" />
+    <ProjectReference Include="..\PetCare.Booking.Domain\PetCare.Booking.Domain.csproj" />
+    <ProjectReference Include="..\PetCare.Booking.Infrastructure\PetCare.Booking.Infrastructure.csproj" />
+    <ProjectReference Include="..\PetCare.Booking.Api\PetCare.Booking.Api.csproj" />
+  </ItemGroup>
+</Project>

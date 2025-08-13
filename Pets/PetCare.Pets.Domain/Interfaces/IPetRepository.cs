@@ -4,10 +4,11 @@ namespace PetCare.Pets.Domain.Interfaces
 {
     public interface IPetRepository
     {
-        Task AddAsync(Pet pet);
         Task<Pet?> GetByIdAsync(Guid id);
-        Task<IEnumerable<Pet>> GetByOwnerAsync(Guid ownerId);
+        Task<Pet?> GetByIdAndOwnerAsync(Guid petId, Guid ownerId); // ✅ Validación directa
         Task<IEnumerable<Pet>> GetAllAsync();
+        Task<Guid> CreateAsync(Pet pet);
+        Task UpdateAsync(Pet pet);
         Task DeleteAsync(Guid id);
     }
 }

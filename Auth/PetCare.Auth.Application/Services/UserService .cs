@@ -6,6 +6,7 @@ using PetCare.Auth.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace PetCare.Auth.Application.Services
@@ -40,7 +41,15 @@ namespace PetCare.Auth.Application.Services
 
             var hashedPassword = Hash(dto.Password);
 
-            var user = new User(Guid.NewGuid(), dto.Email, hashedPassword, dto.FullName, dto.Phone,dto.Username);
+            var user = new User(
+                dto.Email,
+                hashedPassword,
+                dto.Username,
+                dto.FullName,
+                dto.Phone,
+                role.Id
+            );
+
             user.AssignRole(role);
 
             await _userRepository.AddAsync(user);
@@ -74,7 +83,7 @@ namespace PetCare.Auth.Application.Services
 
         private string Hash(string rawPassword)
         {
-            return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(rawPassword));
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(rawPassword));
         }
     }
 }

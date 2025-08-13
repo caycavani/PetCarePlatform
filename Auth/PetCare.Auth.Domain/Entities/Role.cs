@@ -1,40 +1,51 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace PetCare.Auth.Domain.Entities
 {
     public class Role
     {
-        public Guid Id { get; private set; }
+        public Guid Id { get; set; }
 
-        public string Name { get; private set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
-        public string NormalizedName { get; private set; } = string.Empty;
+        public string NormalizedName { get; set; } = string.Empty;
 
-        protected Role() { } // requerido por EF Core
+        public ICollection<User> Users { get; set; } = new List<User>();
 
-        /// <summary>
-        /// Constructor simple, ideal para semilla o registro manual.
-        /// </summary>
+        protected Role() { }
+
         public Role(string name)
+        {
+            SetName(name);
+            Id = Guid.NewGuid();
+        }
+
+        public Role(string name, string normalizedName)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("El nombre del rol no puede estar vacío.", nameof(name));
 
+            if (string.IsNullOrWhiteSpace(normalizedName))
+                throw new ArgumentException("El nombre normalizado no puede estar vacío.", nameof(normalizedName));
+
             Id = Guid.NewGuid();
-            Name = name.Trim().ToLower();
-            NormalizedName = name.Trim().ToUpper();
+            Name = name.Trim().ToLowerInvariant();
+            NormalizedName = normalizedName.Trim().ToUpperInvariant();
         }
 
-        /// <summary>
-        /// Alternativa si quieres permitir cambiar el nombre (opcional).
-        /// </summary>
         public void Rename(string newName)
         {
-            if (string.IsNullOrWhiteSpace(newName))
-                throw new ArgumentException("El nuevo nombre no puede estar vacío.", nameof(newName));
+            SetName(newName);
+        }
 
-            Name = newName.Trim().ToLower();
-            NormalizedName = newName.Trim().ToUpper();
+        private void SetName(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("El nombre no puede estar vacío.", nameof(value));
+
+            Name = value.Trim().ToLowerInvariant();
+            NormalizedName = value.Trim().ToUpperInvariant();
         }
     }
 }

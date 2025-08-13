@@ -16,7 +16,7 @@ namespace PetCare.Pets.Infrastructure.Persistence
                 .AddJsonFile("appsettings.json", optional: false)
                 .Build();
 
-            var connectionString = config.GetConnectionString("DefaultConnection");
+            var connectionString = config.GetConnectionString("PetsDatabase");
 
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new InvalidOperationException("No se encontró la cadena 'DefaultConnection' en appsettings.json.");

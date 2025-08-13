@@ -1,47 +1,110 @@
-﻿version: "3.9"
+﻿version: '3.9'
+
+networks:
+  petcare_net:
+    driver: bridge
 
 services:
-  sqlserver:
-    environment:
-      - MSSQL_PID=Developer
-    volumes:
-      - sqlvolume:/var/opt/mssql
 
   auth-api:
+    build:
+      context: .
+      dockerfile: Auth/PetCare.Auth.Api/Dockerfile
+    container_name: petcare_auth
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__AuthDatabase: "Server=host.docker.internal,1433;Database=PetCareAuthDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
+      Jwt__Issuer: "http://localhost:5001"
+      Jwt__Audience: "PetCareClientApp"
     ports:
       - "5001:80"
+    networks:
+      - petcare_net
 
   pets-api:
+    build:
+      context: .
+      dockerfile: Pets/PetCare.Pets.Api/Dockerfile
+    container_name: petcare_pets
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCarePetsDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
     ports:
       - "5002:80"
+    networks:
+      - petcare_net
 
   booking-api:
+    build:
+      context: .
+      dockerfile: Booking/PetCare.Booking.Api/Dockerfile
+    container_name: petcare_booking
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCareBookingDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
+      Jwt__Issuer: "http://localhost:5001"
+      Jwt__Audience: "PetCareClientApp"
     ports:
       - "5003:80"
+    networks:
+      - petcare_net
 
   review-api:
+    build:
+      context: .
+      dockerfile: Review/PetCare.Review.Api/Dockerfile
+    container_name: petcare_review
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCareReviewDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
     ports:
       - "5004:80"
+    networks:
+      - petcare_net
 
   notification-api:
+    build:
+      context: .
+      dockerfile: Notification/PetCare.Notification.Api/Dockerfile
+    container_name: petcare_notification
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCareNotificationDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
     ports:
       - "5005:80"
+    networks:
+      - petcare_net
 
   payment-api:
+    build:
+      context: .
+      dockerfile: Payment/PetCare.Payment.Api/Dockerfile
+    container_name: petcare_payment
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCarePaymentDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
     ports:
       - "5006:80"
+    networks:
+      - petcare_net
+    depends_on:
+      - pets-api
 
-volumes:
-  sqlvolume:
+  ef-migrator:
+    image: petcareplatform-ef-migrator
+    build:
+      context: .
+      dockerfile: Dockerfile.ef
+    container_name: petcare_ef_migrator
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DOTNET_CLI_HOME: /tmp
+      ConnectionStrings__AuthDatabase: "Server=host.docker.internal,1433;Database=PetCareAuthDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+    volumes:
+      - ./scripts:/tools
+    entrypoint: ["/bin/bash", "-c", "/tools/validate-sql.sh && dotnet ef database update"]
+    networks:
+      - petcare_net
+    restart: "no"

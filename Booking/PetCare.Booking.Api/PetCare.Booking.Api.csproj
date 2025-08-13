@@ -3,19 +3,33 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <!-- Refuerza calidad en CI/CD -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Documentación XML -->
   </PropertyGroup>
+
   <ItemGroup>
+    <!-- Referencias a capas internas del dominio -->
     <ProjectReference Include="..\PetCare.Booking.Infrastructure\PetCare.Booking.Infrastructure.csproj" />
     <ProjectReference Include="..\PetCare.Booking.Domain\PetCare.Booking.Domain.csproj" />
     <ProjectReference Include="..\PetCare.Booking.Application\PetCare.Booking.Application.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+    <!-- Autenticación -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.5" />
+
+    <!-- Entity Framework Core -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+
+    <!-- Swagger -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 </Project>

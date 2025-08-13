@@ -57,9 +57,15 @@ namespace PetCare.Auth.Infrastructure.Persistence
 
                 // 📎 Relación con Role
                 entity.HasOne(u => u.Role)
-                      .WithMany()
+                      .WithMany(r => r.Users)
                       .HasForeignKey(u => u.RoleId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                // 🔁 Relación con RefreshTokens
+                entity.HasMany(u => u.RefreshTokens)
+                      .WithOne(rt => rt.User)
+                      .HasForeignKey(rt => rt.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // 🏷️ ROLE config
@@ -77,8 +83,6 @@ namespace PetCare.Auth.Infrastructure.Persistence
 
                 entity.HasIndex(r => r.NormalizedName)
                       .IsUnique();
-
-              
             });
 
             // 🔁 REFRESH TOKEN config
@@ -90,15 +94,8 @@ namespace PetCare.Auth.Infrastructure.Persistence
                       .HasMaxLength(100)
                       .IsRequired();
 
-               
-
                 entity.Property(rt => rt.ExpiresAt)
                       .IsRequired();
-
-                entity.HasOne<User>()
-                      .WithMany()
-                      .HasForeignKey(rt => rt.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

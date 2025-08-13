@@ -17,7 +17,7 @@ namespace PetCare.Auth.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -124,22 +124,34 @@ namespace PetCare.Auth.Infrastructure.Migrations
 
             modelBuilder.Entity("PetCare.Auth.Domain.Entities.RefreshToken", b =>
                 {
-                    b.HasOne("PetCare.Auth.Domain.Entities.User", null)
-                        .WithMany()
+                    b.HasOne("PetCare.Auth.Domain.Entities.User", "User")
+                        .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PetCare.Auth.Domain.Entities.User", b =>
                 {
                     b.HasOne("PetCare.Auth.Domain.Entities.Role", "Role")
-                        .WithMany()
+                        .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("PetCare.Auth.Domain.Entities.Role", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("PetCare.Auth.Domain.Entities.User", b =>
+                {
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

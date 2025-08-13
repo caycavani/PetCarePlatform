@@ -3,20 +3,33 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
+    <!-- Entity Framework Core con SQL Server -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+
+    <!-- Configuración basada en JSON -->
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.6" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\PetCare.Booking.Application\PetCare.Booking.Application.csproj" />
+    <!-- Dependencias internas -->
+    <ProjectReference Include="..\..\Shared\PetCare.Shared.DTOs\PetCare.Shared.DTOs.csproj" />
     <ProjectReference Include="..\PetCare.Booking.Domain\PetCare.Booking.Domain.csproj" />
   </ItemGroup>
+
   <ItemGroup>
+    <!-- Carpeta física incluida en el proyecto -->
     <Folder Include="Configuration\" />
   </ItemGroup>
 </Project>

@@ -3,9 +3,7 @@ namespace PetCare.Auth.Infrastructure.Repositories
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using System.Xml.Linq;
     using Microsoft.EntityFrameworkCore;
-    using PetCare.Auth.Application.Interfaces;
     using PetCare.Auth.Domain.Entities;
     using PetCare.Auth.Domain.Interfaces;
     using PetCare.Auth.Infrastructure.Persistence;
@@ -32,14 +30,21 @@ namespace PetCare.Auth.Infrastructure.Repositories
 
         public async Task<Role?> GetByNameAsync(string name)
         {
-            var normalized = name?.Trim().ToUpper();
+            var normalized = name?.Trim().ToUpperInvariant();
+            return await _context.Roles
+                .FirstOrDefaultAsync(r => r.NormalizedName == normalized);
+        }
+
+        public async Task<Role?> GetByNormalizedNameAsync(string normalizedName)
+        {
+            var normalized = normalizedName?.Trim().ToUpperInvariant();
             return await _context.Roles
                 .FirstOrDefaultAsync(r => r.NormalizedName == normalized);
         }
 
         public async Task<bool> ExistsAsync(string name)
         {
-            var normalized = name?.Trim().ToUpper();
+            var normalized = name?.Trim().ToUpperInvariant();
             return await _context.Roles.AnyAsync(r => r.NormalizedName == normalized);
         }
 

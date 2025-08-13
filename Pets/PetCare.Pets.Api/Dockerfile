@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0.100 AS build
 WORKDIR /src
 COPY ["Pets/PetCare.Pets.Api/PetCare.Pets.Api.csproj", "Pets/PetCare.Pets.Api/"]
 COPY ["Pets/PetCare.Pets.Infrastructure/PetCare.Pets.Infrastructure.csproj", "Pets/PetCare.Pets.Infrastructure/"]

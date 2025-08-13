@@ -1,6 +1,5 @@
 ﻿using System;
-using BCrypt.Net;
-using PetCare.Auth.Domain.Entities;
+using System.Collections.Generic;
 
 namespace PetCare.Auth.Domain.Entities
 {
@@ -9,66 +8,73 @@ namespace PetCare.Auth.Domain.Entities
         public Guid Id { get; private set; }
 
         public string Email { get; private set; } = string.Empty;
+
         public string PasswordHash { get; private set; } = string.Empty;
-        public string Username { get; private set; } = string.Empty;
+
         public string FullName { get; private set; } = string.Empty;
+
         public string Phone { get; private set; } = string.Empty;
 
-        public bool IsActive { get; private set; } = true;
+        public string Username { get; private set; } = string.Empty;
+
+        public bool IsActive { get; private set; }
+
         public DateTime CreatedAt { get; private set; }
 
-        // 🔗 Relación con Rol
         public Guid RoleId { get; private set; }
-        public Role Role { get; private set; } = default!;
 
-        // 🔐 Constructor protegido para EF Core
+        public Role Role { get; private set; } = null!;
+
+        public ICollection<RefreshToken> RefreshTokens { get; private set; } = new List<RefreshToken>();
+
+        // 🧬 Constructor protegido para EF Core
         protected User() { }
 
-        public User(Guid id, string email, string passwordHash, string fullName, string phone, string username)
+        /// <summary>
+        /// Constructor principal usado al registrar un usuario.
+        /// </summary>
+        public User(string email, string passwordHash, string username, string fullName, string phone, Guid roleId)
         {
-            Id = id;
-            Email = email;
+            Id = Guid.NewGuid();
+            Email = email.Trim().ToLowerInvariant();
             PasswordHash = passwordHash;
-            FullName = fullName;
-            Phone = phone;
-            Username = username;
+            Username = username.Trim();
+            FullName = fullName.Trim();
+            Phone = phone.Trim();
             IsActive = true;
             CreatedAt = DateTime.UtcNow;
+            RoleId = roleId;
         }
 
-        // 🛠️ Asignar rol
+        /// <summary>
+        /// Asigna el rol completo al usuario.
+        /// </summary>
         public void AssignRole(Role role)
         {
-            if (role is null)
-                throw new ArgumentNullException(nameof(role));
-
             Role = role;
             RoleId = role.Id;
         }
 
-        // 🔐 Establecer contraseña con hash seguro
-        public void SetPassword(string plainPassword)
-        {
-            if (string.IsNullOrWhiteSpace(plainPassword))
-                throw new ArgumentException("La contraseña no puede estar vacía.");
-
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(plainPassword);
-        }
-
-        // 🔐 Verificar contraseña
-        public bool VerifyPassword(string input)
-        {
-            return BCrypt.Net.BCrypt.Verify(input, PasswordHash);
-        }
-
-        // 📞 Actualizar perfil
+        /// <summary>
+        /// Actualiza datos del perfil del usuario.
+        /// </summary>
         public void UpdateProfile(string fullName, string phone)
         {
-            FullName = fullName;
-            Phone = phone;
+            FullName = fullName.Trim();
+            Phone = phone.Trim();
         }
 
-        // 🚫 Desactivar cuenta
+        /// <summary>
+        /// Establece una nueva contraseña.
+        /// </summary>
+        public void SetPassword(string hashedPassword)
+        {
+            PasswordHash = hashedPassword;
+        }
+
+        /// <summary>
+        /// Desactiva el usuario.
+        /// </summary>
         public void Deactivate()
         {
             IsActive = false;

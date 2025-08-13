@@ -6,12 +6,14 @@ WORKDIR /src
 COPY Booking/PetCare.Booking.Api/PetCare.Booking.Api.csproj Booking/PetCare.Booking.Api/
 COPY Booking/PetCare.Booking.Infrastructure/PetCare.Booking.Infrastructure.csproj Booking/PetCare.Booking.Infrastructure/
 COPY Booking/PetCare.Booking.Domain/PetCare.Booking.Domain.csproj Booking/PetCare.Booking.Domain/
+COPY Shared/PetCare.Shared.DTOs/PetCare.Shared.DTOs.csproj Shared/PetCare.Shared.DTOs/
 
 # Restaurar dependencias
 RUN dotnet restore Booking/PetCare.Booking.Api/PetCare.Booking.Api.csproj
 
 # Copiar el resto del microservicio
 COPY Booking/ Booking/
+COPY Shared/ Shared/
 
 # Compilar y publicar
 WORKDIR /src/Booking/PetCare.Booking.Api

@@ -2,17 +2,20 @@ namespace PetCare.Pets.Domain.Entities
 {
     public class Pet
     {
-        public Guid Id { get; private set; }
+        public Guid Id { get;  set; }
 
-        public Guid OwnerId { get; private set; }
+        public Guid OwnerId { get;  set; }
 
-        public string Name { get; private set; }
+        public string Name { get;  set; }
 
-        public string Type { get; private set; }
+        public string Type { get;  set; }
 
-        public DateTime BirthDate { get; private set; }
+        public DateTime BirthDate { get;  set; }
+        public string Breed { get; set; }
+        public int Age { get; set; }
 
-        protected Pet() { }
+
+        public Pet() { }
 
         public Pet(Guid ownerId, string name, string type, DateTime birthDate)
         {

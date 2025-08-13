@@ -1,7 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\..\Shared\PetCare.Shared.DTOs\PetCare.Shared.DTOs.csproj" />
     <ProjectReference Include="..\PetCare.Pets.Domain\PetCare.Pets.Domain.csproj" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="UseCases\" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PetCare.Auth.Api.Models;
 using PetCare.Auth.Application.DTOs.Roles;
 using PetCare.Auth.Application.Interfaces;
 using System;
@@ -42,7 +41,6 @@ namespace PetCare.Auth.Api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateRoleDto request)
         {
             var newRoleId = await _roleService.CreateAsync(request);
@@ -53,13 +51,11 @@ namespace PetCare.Auth.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] CreateRoleDto request)
         {
             await _roleService.UpdateAsync(id, request);
             return NoContent();
         }
-
 
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

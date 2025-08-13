@@ -12,4 +12,7 @@
   <ItemGroup>
     <Folder Include="Repositories\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Booking\PetCare.Booking.Domain\PetCare.Booking.Domain.csproj" />
+  </ItemGroup>
 </Project>
