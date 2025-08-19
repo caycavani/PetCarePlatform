@@ -15,11 +15,19 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.5" />
 
     <!-- Configuración basada en JSON -->
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.5" />
   </ItemGroup>
 
   <ItemGroup>

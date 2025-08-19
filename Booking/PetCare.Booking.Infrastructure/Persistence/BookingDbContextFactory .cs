@@ -18,7 +18,7 @@ namespace PetCare.Booking.Infrastructure.Persistence
                 .AddJsonFile("appsettings.json", optional: false)
                 .Build();
 
-            var connectionString = config.GetConnectionString("BookingDatabase");
+            var connectionString = config.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new InvalidOperationException("No se encontró la cadena 'DefaultConnection' en appsettings.json.");

@@ -1,0 +1,109 @@
+openapi: 3.0.3
+info:
+  title: PetCare Payment API
+  version: 1.0.0
+  description: API para gestionar pagos asociados a reservas de cuidadores de mascotas.
+
+paths:
+  /api/payments:
+    post:
+      summary: Iniciar pago para una reserva confirmada
+      operationId: initiatePayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Pago registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          description: Datos inválidos
+        '500':
+          description: Error interno del servidor
+
+  /api/payments/{paymentId}/status:
+    get:
+      summary: Consultar estado de un pago
+      operationId: getPaymentStatus
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Estado del pago
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStatusResponse'
+        '404':
+          description: Pago no encontrado
+
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required:
+        - bookingId
+        - petOwnerId
+        - caregiverId
+        - amount
+        - currency
+        - method
+        - serviceType
+        - callbackUrl
+      properties:
+        bookingId:
+          type: string
+        petOwnerId:
+          type: string
+        caregiverId:
+          type: string
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+          example: COP
+        method:
+          type: string
+          enum: [PSE, CreditCard, Cash]
+        serviceType:
+          type: string
+          enum: [Hospedaje, Paseo, Guardería]
+        callbackUrl:
+          type: string
+          format: uri
+
+    PaymentResponse:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        status:
+          type: string
+          enum: [Pending, Completed, Failed]
+        redirectUrl:
+          type: string
+          format: uri
+
+    PaymentStatusResponse:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        status:
+          type: string
+        transactionId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

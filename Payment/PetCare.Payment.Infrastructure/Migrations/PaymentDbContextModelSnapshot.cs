@@ -17,7 +17,7 @@ namespace PetCare.Payment.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -31,20 +31,161 @@ namespace PetCare.Payment.Infrastructure.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Method")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("PaidAt")
+                    b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExternalTransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GatewayResponse")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsSuccessful")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentMethodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentMethodToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PaymentStatusId")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("ReservationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("PaymentMethodId");
+
+                    b.HasIndex("PaymentStatusId");
+
                     b.ToTable("Payments", (string)null);
+                });
+
+            modelBuilder.Entity("PetCare.Payment.Domain.Entities.PaymentMethod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PaymentMethods", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "CreditCard"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Cash"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Nequi"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Daviplata"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "BankTransfer"
+                        },
+                        new
+                        {
+                            Id = 99,
+                            Name = "Other"
+                        });
+                });
+
+            modelBuilder.Entity("PetCare.Payment.Domain.Entities.PaymentStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PaymentStatuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Pending"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Completed"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Failed"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Refunded"
+                        });
+                });
+
+            modelBuilder.Entity("PetCare.Payment.Domain.Entities.Pay", b =>
+                {
+                    b.HasOne("PetCare.Payment.Domain.Entities.PaymentMethod", "Method")
+                        .WithMany()
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetCare.Payment.Domain.Entities.PaymentStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("PaymentStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Method");
+
+                    b.Navigation("Status");
                 });
 #pragma warning restore 612, 618
         }

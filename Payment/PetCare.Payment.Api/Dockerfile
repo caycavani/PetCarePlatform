@@ -6,18 +6,14 @@ WORKDIR /src
 COPY Payment/PetCare.Payment.Api/PetCare.Payment.Api.csproj Payment/PetCare.Payment.Api/
 COPY Payment/PetCare.Payment.Infrastructure/PetCare.Payment.Infrastructure.csproj Payment/PetCare.Payment.Infrastructure/
 COPY Payment/PetCare.Payment.Domain/PetCare.Payment.Domain.csproj Payment/PetCare.Payment.Domain/
-
-# 📦 Copiar también el proyecto compartido que contiene el DTO
 COPY Shared/PetCare.Shared.DTOs/PetCare.Shared.DTOs.csproj Shared/PetCare.Shared.DTOs/
-COPY Shared/ Shared/
-
 
 # 🔧 Restaurar dependencias NuGet (resuelve todos los project references antes de copiar el resto del código)
 RUN dotnet restore Payment/PetCare.Payment.Api/PetCare.Payment.Api.csproj
 
-# 📁 Copiar el resto del código fuente de Payment y Shared
+# 📁 Copiar el resto del código fuente de Payment y solo el proyecto compartido necesario
 COPY Payment/ Payment/
-COPY Shared/ Shared/
+COPY Shared/PetCare.Shared.DTOs/ Shared/PetCare.Shared.DTOs/
 
 # ⚙️ Publicar la API en modo Release
 WORKDIR /src/Payment/PetCare.Payment.Api

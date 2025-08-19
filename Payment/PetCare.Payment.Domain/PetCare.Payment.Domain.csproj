@@ -10,4 +10,7 @@
     <Folder Include="Repositories\" />
     <Folder Include="Services\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\PetCare.Shared.DTOs\PetCare.Shared.DTOs.csproj" />
+  </ItemGroup>
 </Project>

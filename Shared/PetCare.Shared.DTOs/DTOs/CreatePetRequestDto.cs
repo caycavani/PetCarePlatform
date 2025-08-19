@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PetCare.Shared.DTOs;
+namespace PetCare.Shared.DTOs.DTOs;
 
 public class CreatePetRequestDto
 {

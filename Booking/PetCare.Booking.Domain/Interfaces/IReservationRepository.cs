@@ -21,5 +21,8 @@ namespace PetCare.Booking.Domain.Interfaces
 
         Task<bool> HasConflictAsync(Guid petId, DateTime start, DateTime end);
 
+        Task<bool> UpdateAsync(Reservation reservation);
+
+
     }
 }

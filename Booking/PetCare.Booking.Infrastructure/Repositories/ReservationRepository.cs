@@ -37,7 +37,7 @@ namespace PetCare.Booking.Infrastructure.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // ❌ Cancelar reserva (marcar como cancelada si tienes columna correspondiente)
+        // ❌ Cancelar reserva
         public async Task<bool> CancelAsync(Guid id)
         {
             var reservation = await GetRawByIdAsync(id);
@@ -49,7 +49,7 @@ namespace PetCare.Booking.Infrastructure.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // ✔️ Aceptar reserva (marca como aceptada si tienes lógica de estado)
+        // ✔️ Aceptar reserva
         public async Task<bool> AcceptAsync(Guid id)
         {
             var reservation = await GetRawByIdAsync(id);
@@ -61,35 +61,19 @@ namespace PetCare.Booking.Infrastructure.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // 📝 Actualizar nota (sin validar propiedad aquí)
+        // 📝 Actualizar nota
         public async Task<bool> UpdateNoteAsync(Guid id, string note)
         {
             var reservation = await GetRawByIdAsync(id);
             if (reservation is null)
                 return false;
 
-            reservation.UpdateNote(note); // Método sugerido en entidad
+            reservation.UpdateNote(note);
             _context.Reservations.Update(reservation);
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<Reservation?> GetByIdAsync(Guid id)
-        {
-            return await GetRawByIdAsync(id); // Ya lo tienes definido, lo reutilizamos
-        }
-
-        public async Task<IEnumerable<Reservation>> GetByClientIdAsync(Guid clientId)
-        {
-            return await _context.Reservations
-                .Where(r => r.ClientId == clientId)
-                .ToListAsync();
-        }
-
-        public async Task<bool> ExistsAsync(Guid id)
-        {
-            return await _context.Reservations.AnyAsync(r => r.Id == id);
-        }
-
+        // 🔄 Actualizar estado
         public async Task<bool> UpdateStatusAsync(Guid id, int status)
         {
             var reservation = await GetRawByIdAsync(id);
@@ -101,6 +85,34 @@ namespace PetCare.Booking.Infrastructure.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
+        // 🧾 Actualizar reserva completa (usado en callbacks de pago)
+        public async Task<bool> UpdateAsync(Reservation reservation)
+        {
+            _context.Reservations.Update(reservation);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        // 🔍 Obtener por ID
+        public async Task<Reservation?> GetByIdAsync(Guid id)
+        {
+            return await GetRawByIdAsync(id);
+        }
+
+        // 🔍 Obtener por cliente
+        public async Task<IEnumerable<Reservation>> GetByClientIdAsync(Guid clientId)
+        {
+            return await _context.Reservations
+                .Where(r => r.ClientId == clientId)
+                .ToListAsync();
+        }
+
+        // 🔎 Verificar existencia
+        public async Task<bool> ExistsAsync(Guid id)
+        {
+            return await _context.Reservations.AnyAsync(r => r.Id == id);
+        }
+
+        // 🗑️ Eliminar reserva
         public async Task<bool> DeleteAsync(Guid id)
         {
             var reservation = await GetRawByIdAsync(id);
@@ -111,15 +123,15 @@ namespace PetCare.Booking.Infrastructure.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
+        // ⚠️ Validar conflictos de fechas
         public async Task<bool> HasConflictAsync(Guid petId, DateTime start, DateTime end)
         {
             return await _context.Reservations.AnyAsync(r =>
                 r.PetId == petId &&
                 r.StartDate < end &&
                 r.EndDate > start &&
-                r.ReservationStatusId != 3 // excluye reservas canceladas
+                r.ReservationStatusId != ReservationStatuses.Canceled
             );
         }
-
     }
 }

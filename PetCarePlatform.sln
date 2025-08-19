@@ -81,6 +81,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetCare.Booking.Application
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetCare.Booking.Extensions", "Booking\PetCare.Booking.Extensions\PetCare.Booking.Extensions.csproj", "{A9AA7222-A758-9F38-F5E3-7FFA6592E358}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C41B7985-BE8F-4B74-8CC3-AF4B7E2AC12E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "openapi", "openapi", "{404DDC23-BB75-4B13-B457-9AB04DE6CEF9}"
+	ProjectSection(SolutionItems) = preProject
+		Booking\payment-api.yaml = Booking\payment-api.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -460,6 +467,8 @@ Global
 		{A3B426CD-EEBB-8F9F-427B-1552E151A28A} = {049709DC-B2E1-CB57-AF8D-0E936AF5ACCA}
 		{00C3A313-136F-4E1D-9B72-57983DE6BAC5} = {049709DC-B2E1-CB57-AF8D-0E936AF5ACCA}
 		{A9AA7222-A758-9F38-F5E3-7FFA6592E358} = {049709DC-B2E1-CB57-AF8D-0E936AF5ACCA}
+		{C41B7985-BE8F-4B74-8CC3-AF4B7E2AC12E} = {049709DC-B2E1-CB57-AF8D-0E936AF5ACCA}
+		{404DDC23-BB75-4B13-B457-9AB04DE6CEF9} = {C41B7985-BE8F-4B74-8CC3-AF4B7E2AC12E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {33440C8B-D1D8-4489-AC05-603E5CAFF1D5}
