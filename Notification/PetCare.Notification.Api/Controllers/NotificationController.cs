@@ -1,40 +1,45 @@
 using Microsoft.AspNetCore.Mvc;
-using PetCare.Notification.Application.DTOs;
-using PetCare.Notification.Application.UseCases;
+using PetCare.Notification.Api.Models;
+using PetCare.Notification.Domain.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
-namespace PetCare.Notification.Api.Controllers
+namespace PetCare.Notification.Api.Controllers;
+
+/// <summary>
+/// Controlador principal para gestionar notificaciones.
+/// </summary>
+[ApiController]
+[Route("api/[controller]")]
+public class NotificationController : ControllerBase
 {
-    /// <summary>
-    /// Controlador para gestionar el envío de notificaciones.
-    /// </summary>
-    [ApiController]
-    [Route("api/[controller]")]
-    public class NotificationController : ControllerBase
+    private readonly INotificationProducer _producer;
+
+    public NotificationController(INotificationProducer producer)
     {
-        private readonly SendNotificationUseCase _useCase;
+        _producer = producer;
+    }
 
-        /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="NotificationController"/>.
-        /// </summary>
-        /// <param name="useCase">Caso de uso para enviar notificaciones.</param>
-        public NotificationController(SendNotificationUseCase useCase)
+    /// <summary>
+    /// Publica una nueva notificación en Kafka.
+    /// </summary>
+    /// <param name="request">Datos de la notificación.</param>
+    /// <returns>Resultado de la operación.</returns>
+    [HttpPost]
+    public async Task<IActionResult> PublishNotification([FromBody] NotificationRequest request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var message = $"Notificación para {request.Recipient} | Canal: {request.Channel} | Mensaje: {request.Message}";
+
+        await _producer.PublishAsync(message);
+
+        return Ok(new
         {
-            _useCase = useCase;
-        }
-
-        /// <summary>
-        /// Envía una nueva notificación al destinatario especificado.
-        /// </summary>
-        /// <param name="dto">Datos de la notificación.</param>
-        /// <returns>El identificador de la notificación creada.</returns>
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreateNotificationDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var id = await _useCase.ExecuteAsync(dto);
-            return Ok(new { Id = id });
-        }
+            Status = "Publicado",
+            Topic = "notification-events",
+            Recipient = request.Recipient,
+            Timestamp = DateTime.UtcNow
+        });
     }
 }

@@ -17,31 +17,95 @@ namespace PetCare.Notification.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("PetCare.Notification.Domain.Entities.RNotification", b =>
+            modelBuilder.Entity("PetCare.Notification.Domain.Entities.Ntification", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Message")
+                    b.Property<string>("Channel")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
-                    b.Property<Guid>("RecipientId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("SentAt")
+                    b.Property<DateTime>("ScheduledAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.ToTable("Notifications", (string)null);
+                });
+
+            modelBuilder.Entity("PetCare.Notification.Domain.Entities.Ntification", b =>
+                {
+                    b.OwnsOne("PetCare.Notification.Domain.Value_Objects.NotificationContent", "Content", b1 =>
+                        {
+                            b1.Property<Guid>("NtificationId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Message")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)")
+                                .HasColumnName("Message");
+
+                            b1.Property<string>("Subject")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("Subject");
+
+                            b1.HasKey("NtificationId");
+
+                            b1.ToTable("Notifications");
+
+                            b1.WithOwner()
+                                .HasForeignKey("NtificationId");
+                        });
+
+                    b.OwnsOne("PetCare.Notification.Domain.Value_Objects.Recipient", "Recipient", b1 =>
+                        {
+                            b1.Property<Guid>("NtificationId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("DeviceToken")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("RecipientDeviceToken");
+
+                            b1.Property<string>("Email")
+                                .IsRequired()
+                                .HasMaxLength(150)
+                                .HasColumnType("nvarchar(150)")
+                                .HasColumnName("RecipientEmail");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("RecipientName");
+
+                            b1.Property<string>("PhoneNumber")
+                                .HasMaxLength(20)
+                                .HasColumnType("nvarchar(20)")
+                                .HasColumnName("RecipientPhoneNumber");
+
+                            b1.HasKey("NtificationId");
+
+                            b1.ToTable("Notifications");
+
+                            b1.WithOwner()
+                                .HasForeignKey("NtificationId");
+                        });
+
+                    b.Navigation("Content");
+
+                    b.Navigation("Recipient");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,30 +1,49 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using PetCare.Notification.Infrastructure.Persistence;
 using System;
 using System.IO;
 
 namespace PetCare.Notification.Infrastructure.Persistence
 {
+    /// <summary>
+    /// Fábrica de contexto utilizada en tiempo de diseño para ejecutar migraciones.
+    /// </summary>
     public class NotificationDbContextFactory : IDesignTimeDbContextFactory<NotificationDbContext>
     {
         public NotificationDbContext CreateDbContext(string[] args)
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.FullName, "PetCare.Notification.Api"))
-                .AddJsonFile("appsettings.json", optional: false)
+            // Ruta base del proyecto API (ajustable según estructura de solución)
+            var basePath = Path.Combine(
+                Directory.GetParent(Directory.GetCurrentDirectory())!.FullName,
+                "PetCare.Notification.Api"
+            );
+
+            // Carga de configuración desde appsettings.json
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(basePath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var connectionString = config.GetConnectionString("DefaultConnection");
+            // Obtención de cadena de conexión
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException("No se encontró la cadena 'DefaultConnection' en appsettings.json.");
+            {
+                throw new InvalidOperationException(
+                    "No se encontró la cadena de conexión 'DefaultConnection' en appsettings.json."
+                );
+            }
 
-            var options = new DbContextOptionsBuilder<NotificationDbContext>();
-            options.UseSqlServer(connectionString);
+            // Configuración del DbContext con SQL Server
+            var optionsBuilder = new DbContextOptionsBuilder<NotificationDbContext>();
+            optionsBuilder.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.MigrationsAssembly(typeof(NotificationDbContextFactory).Assembly.FullName);
+                sqlOptions.EnableRetryOnFailure(3); // Reintentos ante fallos transitorios
+            });
 
-            return new NotificationDbContext(options.Options);
+            return new NotificationDbContext(optionsBuilder.Options);
         }
     }
 }
