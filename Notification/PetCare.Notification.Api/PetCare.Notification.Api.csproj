@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Shared\PetCare.Shared.DTOs\PetCare.Shared.DTOs.csproj" />
     <ProjectReference Include="..\PetCare.Notification.Application\PetCare.Notification.Application.csproj" />
     <ProjectReference Include="..\PetCare.Notification.Domain\PetCare.Notification.Domain.csproj" />
     <ProjectReference Include="..\PetCare.Notification.Infrastructure\PetCare.Notification.Infrastructure.csproj" />

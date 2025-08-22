@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using PetCare.Notification.Application.Kafka;
 using PetCare.Notification.Domain.Interfaces;
+using PetCare.Shared.DTOs.DTOs;
 using System.Text.Json;
 
 namespace PetCare.Notification.Infrastructure.Kafka;
@@ -53,7 +54,16 @@ public class NotificationProducer : INotificationProducer
 
             if (_settings.EnableDebugLogging)
             {
-                Console.WriteLine($"🧪 Detalles: {JsonSerializer.Serialize(ex)}");
+                var errorDto = new ErrorDetailsDto
+                {
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    ExceptionType = ex.GetType().ToString(),
+                    StackTrace = ex.StackTrace
+                };
+
+                var errorJson = JsonSerializer.Serialize(errorDto);
+                Console.WriteLine($"🧪 Detalles serializados: {errorJson}");
             }
 
             throw;

@@ -20,6 +20,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="8.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.5" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.5" />
@@ -27,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Shared\PetCare.Shared.DTOs\PetCare.Shared.DTOs.csproj" />
     <ProjectReference Include="..\PetCare.Notification.Application\PetCare.Notification.Application.csproj" />
     <ProjectReference Include="..\PetCare.Notification.Domain\PetCare.Notification.Domain.csproj" />
   </ItemGroup>

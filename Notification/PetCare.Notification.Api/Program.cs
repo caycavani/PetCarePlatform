@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using PetCare.Notification.Application.Interfaces;
 using PetCare.Notification.Application.Kafka;
 using PetCare.Notification.Domain.Interfaces;
+using PetCare.Notification.Infrastructure.kafka;
 using PetCare.Notification.Infrastructure.Kafka;
 using PetCare.Notification.Infrastructure.Persistence;
 using PetCare.Notification.Infrastructure.Repositories;
@@ -58,6 +59,9 @@ builder.Services.AddSingleton<INotificationProducer, NotificationProducer>();
 
 // 📦 Configuración de Kafka desde appsettings.json
 builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
+// 📦 Consumer de Kafka
+builder.Services.AddHostedService<NotificationConsumer>();
+
 
 // 🔐 Configuración de autenticación JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -84,19 +88,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var app = builder.Build();
 
 // 🚀 Middleware
-if (app.Environment.IsDevelopment())
+app.UseRouting(); // 🔄 Asegura el orden correcto
+
+// 🧪 Swagger disponible en todos los entornos (puedes limitarlo si prefieres)
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "PetCare.Notification API v1");
-        c.RoutePrefix = string.Empty;
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "PetCare.Notification API v1");
+    c.RoutePrefix = string.Empty;
+});
 
 app.UseHttpsRedirection();
 app.UseAuthentication(); // 🔐 JWT
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

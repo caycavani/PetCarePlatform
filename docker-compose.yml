@@ -6,6 +6,26 @@ networks:
 
 services:
 
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: petcare_kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://host.docker.internal:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@petcare_kafka:9093"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+      CLUSTER_ID: "WubDWjzVeUus0p32WsEu4g=="
+    networks:
+      - petcare_net
+
   auth-api:
     build:
       context: .
@@ -72,10 +92,21 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Server=192.168.1.54,1433;Database=PetCareNotificationDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      Kafka__BootstrapServers: "petcare_kafka:9092"
+      Kafka__Topic: "notification-events"
+      Kafka__ClientId: "notification-producer"
+      Kafka__RetryCount: 3
+      Kafka__MessageTimeoutMs: 10000
+      Kafka__EnableDebugLogging: true
+      Kafka__SecurityProtocol: "PLAINTEXT"
+      Kafka__Acks: "all"
+      Kafka__CompressionType: "gzip"
     ports:
       - "5005:80"
     networks:
       - petcare_net
+    depends_on:
+      - kafka
 
   payment-api:
     build:
@@ -95,7 +126,7 @@ services:
   ef-migrator:
     image: petcareplatform-ef-migrator
     build:
-      context: .  # 🔧 Cambio crítico aplicado
+      context: .
       dockerfile: EfMigrator/Dockerfile.ef
     container_name: petcare_ef_migrator
     environment:
