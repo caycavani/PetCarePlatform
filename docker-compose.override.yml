@@ -1,10 +1,28 @@
-﻿version: '3.9'
-
-networks:
+﻿networks:
   petcare_net:
     driver: bridge
 
 services:
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: petcare_kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://petcare_kafka:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@petcare_kafka:9093"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+      CLUSTER_ID: "WubDWjzVeUus0p32WsEu4g=="
+    networks:
+      - petcare_net
 
   auth-api:
     build:
@@ -13,9 +31,9 @@ services:
     container_name: petcare_auth
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__AuthDatabase: "Server=host.docker.internal,1433;Database=PetCareAuthDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__AuthDatabase: "Server=192.168.10.10,1433;Database=PetCareAuthDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
       Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
-      Jwt__Issuer: "http://localhost:5001"
+      Jwt__Issuer: "http://petcare_auth"
       Jwt__Audience: "PetCareClientApp"
     ports:
       - "5001:80"
@@ -29,7 +47,7 @@ services:
     container_name: petcare_pets
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCarePetsDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCarePetsDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
     ports:
       - "5002:80"
     networks:
@@ -42,9 +60,9 @@ services:
     container_name: petcare_booking
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCareBookingDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCareBookingDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
       Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
-      Jwt__Issuer: "http://localhost:5001"
+      Jwt__Issuer: "http://petcare_auth"
       Jwt__Audience: "PetCareClientApp"
     ports:
       - "5003:80"
@@ -58,11 +76,17 @@ services:
     container_name: petcare_review
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCareReviewDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCareReviewDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
+      Jwt__Issuer: "http://petcare_auth"
+      Jwt__Audience: "PetCareClientApp"
     ports:
-      - "5004:80"
+      - "5010:80"
     networks:
       - petcare_net
+    depends_on:
+      - auth-api
+      - booking-api
 
   notification-api:
     build:
@@ -71,11 +95,22 @@ services:
     container_name: petcare_notification
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCareNotificationDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCareNotificationDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      Kafka__BootstrapServers: "petcare_kafka:9092"
+      Kafka__Topic: "notification-events"
+      Kafka__ClientId: "notification-producer"
+      Kafka__RetryCount: 3
+      Kafka__MessageTimeoutMs: 10000
+      Kafka__EnableDebugLogging: true
+      Kafka__SecurityProtocol: "PLAINTEXT"
+      Kafka__Acks: "all"
+      Kafka__CompressionType: "gzip"
     ports:
       - "5005:80"
     networks:
       - petcare_net
+    depends_on:
+      - kafka
 
   payment-api:
     build:
@@ -84,27 +119,10 @@ services:
     container_name: petcare_payment
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=PetCarePaymentDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCarePaymentDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
     ports:
       - "5006:80"
     networks:
       - petcare_net
     depends_on:
       - pets-api
-
-  ef-migrator:
-    image: petcareplatform-ef-migrator
-    build:
-      context: .
-      dockerfile: Dockerfile.ef
-    container_name: petcare_ef_migrator
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      DOTNET_CLI_HOME: /tmp
-      ConnectionStrings__AuthDatabase: "Server=host.docker.internal,1433;Database=PetCareAuthDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
-    volumes:
-      - ./scripts:/tools
-    entrypoint: ["/bin/bash", "-c", "/tools/validate-sql.sh && dotnet ef database update"]
-    networks:
-      - petcare_net
-    restart: "no"

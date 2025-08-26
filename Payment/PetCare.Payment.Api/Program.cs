@@ -10,9 +10,11 @@ using PetCare.Payment.Infrastructure.Gateways.PSE;
 using PetCare.Payment.Infrastructure.Gateways.Wompi;
 using PetCare.Payment.Infrastructure.Persistence;
 using PetCare.Payment.Infrastructure.Repositories;
+using PetCare.Shared.DTOs.Utils; // ✅ Importación de JwtSettings
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 // 🔧 Servicios MVC + validación
 builder.Services.AddControllers()
@@ -45,40 +47,41 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// 🔐 Configuración de autenticación JWT
+// 🔐 Configuración JWT centralizada
+builder.Services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>();
+
+if (string.IsNullOrWhiteSpace(jwtSettings?.Secret))
+    throw new InvalidOperationException("La clave JWT no está configurada correctamente. Verifica 'Jwt:Secret' en appsettings.json.");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = builder.Configuration["Jwt:Authority"];
-        options.RequireHttpsMetadata = builder.Configuration.GetValue<bool>("Jwt:RequireHttps");
+        options.RequireHttpsMetadata = configuration.GetValue<bool>("Jwt:RequireHttps", false);
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidIssuer = jwtSettings.Issuer,
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidAudience = jwtSettings.Audience,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"])
-            )
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
         };
     });
 
+builder.Services.AddAuthorization();
+
 // 🔌 DbContext SQL Server
 builder.Services.AddDbContext<PaymentDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// 🧪 HealthChecks (✅ Corregido)
-/*builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));*/
+    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
 // 🌐 CORS
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>();
+        var origins = configuration.GetSection("Cors:Origins").Get<string[]>();
         policy.WithOrigins(origins)
               .AllowAnyHeader()
               .AllowAnyMethod();

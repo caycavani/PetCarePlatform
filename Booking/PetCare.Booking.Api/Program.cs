@@ -9,6 +9,7 @@ using PetCare.Booking.Infrastructure.ExternalServices.Pets;
 using PetCare.Booking.Infrastructure.ExternalServices.Pets.Interfaces;
 using PetCare.Booking.Infrastructure.Persistence;
 using PetCare.Booking.Infrastructure.Repositories;
+using PetCare.Shared.DTOs.Utils;
 using System.Text;
 
 namespace PetCare.Booking.Api
@@ -18,6 +19,12 @@ namespace PetCare.Booking.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // ✅ Lectura reproducible de configuración
+            builder.Configuration
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
             var configuration = builder.Configuration;
 
             // 🔧 Servicios base
@@ -71,10 +78,21 @@ namespace PetCare.Booking.Api
                     client.BaseAddress = new Uri(configuration["Services:PetApi"]);
                 });
 
-            // 🔐 Configuración de JWT Authentication
-            var jwtSecret = configuration["Jwt:Secret"];
-            var jwtIssuer = configuration["Jwt:Issuer"];
-            var jwtAudience = configuration["Jwt:Audience"];
+            // 🔐 Configuración JWT centralizada
+            builder.Services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+            var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>();
+
+            Console.WriteLine("🔍 JWT Settings cargados:");
+            Console.WriteLine($"  Issuer:   {jwtSettings.Issuer}");
+            Console.WriteLine($"  Audience: {jwtSettings.Audience}");
+            Console.WriteLine($"  Secret:   {(string.IsNullOrWhiteSpace(jwtSettings.Secret) ? "[VACÍO]" : "[OK]")}");
+
+            if (string.IsNullOrWhiteSpace(jwtSettings?.Secret) ||
+                string.IsNullOrWhiteSpace(jwtSettings.Issuer) ||
+                string.IsNullOrWhiteSpace(jwtSettings.Audience))
+            {
+                throw new InvalidOperationException("❌ Configuración JWT incompleta. Verifica 'Jwt:Secret', 'Jwt:Issuer' y 'Jwt:Audience'.");
+            }
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -83,14 +101,15 @@ namespace PetCare.Booking.Api
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
-                        ValidIssuer = jwtIssuer,
+                        ValidIssuer = jwtSettings.Issuer,
                         ValidateAudience = true,
-                        ValidAudience = jwtAudience,
+                        ValidAudience = jwtSettings.Audience,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtSecret ?? throw new InvalidOperationException("JWT Secret missing"))
-                        )
+                            Encoding.UTF8.GetBytes(jwtSettings.Secret)
+                        ),
+                        ClockSkew = TimeSpan.Zero
                     };
                 });
 
@@ -126,6 +145,16 @@ namespace PetCare.Booking.Api
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
+
+            // ✅ Endpoint de diagnóstico JWT
+            app.MapGet("/api/debug/jwt-config", () =>
+            {
+                var issuer = jwtSettings.Issuer;
+                var audience = jwtSettings.Audience;
+                var secretLength = string.IsNullOrWhiteSpace(jwtSettings.Secret) ? 0 : jwtSettings.Secret.Length;
+
+                return Results.Ok(new { issuer, audience, secretLength });
+            });
 
             app.Run();
         }

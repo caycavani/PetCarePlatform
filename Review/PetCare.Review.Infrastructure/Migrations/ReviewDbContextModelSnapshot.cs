@@ -22,7 +22,7 @@ namespace PetCare.Review.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("PetCare.Review.Domain.Entities.Rview", b =>
+            modelBuilder.Entity("PetCare.Review.Domain.Entities.Review", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -31,16 +31,8 @@ namespace PetCare.Review.Infrastructure.Migrations
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("ReservationId")
                         .HasColumnType("uniqueidentifier");
@@ -48,6 +40,49 @@ namespace PetCare.Review.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Reviews", (string)null);
+                });
+
+            modelBuilder.Entity("PetCare.Review.Domain.Entities.Review", b =>
+                {
+                    b.OwnsOne("PetCare.Review.Domain.ValueObjects.Comment", "Comment", b1 =>
+                        {
+                            b1.Property<Guid>("ReviewId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)")
+                                .HasColumnName("Comment");
+
+                            b1.HasKey("ReviewId");
+
+                            b1.ToTable("Reviews");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ReviewId");
+                        });
+
+                    b.OwnsOne("PetCare.Review.Domain.ValueObjects.Rating", "Rating", b1 =>
+                        {
+                            b1.Property<Guid>("ReviewId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Value")
+                                .HasColumnType("int")
+                                .HasColumnName("Rating");
+
+                            b1.HasKey("ReviewId");
+
+                            b1.ToTable("Reviews");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ReviewId");
+                        });
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("Rating");
                 });
 #pragma warning restore 612, 618
         }

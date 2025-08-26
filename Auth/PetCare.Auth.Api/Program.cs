@@ -11,6 +11,7 @@ using PetCare.Auth.Application.Services;
 using PetCare.Auth.Domain.Interfaces;
 using PetCare.Auth.Infrastructure.Persistence;
 using PetCare.Auth.Infrastructure.Repositories;
+using PetCare.Shared.DTOs.Utils;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
@@ -20,6 +21,13 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ✅ Agregar lectura de variables de entorno
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
 
 // 📋 Logging
 builder.Logging.ClearProviders();
@@ -42,14 +50,23 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// 🔐 Registro directo del generador real
+// 🔐 Configuración JWT compartida
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
 // 🔐 Autenticación JWT
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+var key = Encoding.UTF8.GetBytes(jwtSettings.Secret);
+
+// 🧪 Log de configuración JWT activa
+Console.WriteLine("🔐 Configuración JWT activa:");
+Console.WriteLine($"  Issuer:   {jwtSettings.Issuer}");
+Console.WriteLine($"  Audience: {jwtSettings.Audience}");
+Console.WriteLine($"  Secret:   {(string.IsNullOrWhiteSpace(jwtSettings.Secret) ? "[VACÍO]" : "[OK]")}");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"] ?? string.Empty);
         options.RequireHttpsMetadata = false;
         options.SaveToken = true;
 
@@ -67,9 +84,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidIssuer = jwtSettings.Issuer,
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidAudience = jwtSettings.Audience,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
@@ -167,7 +184,10 @@ app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// 🔧 Endpoints de diagnóstico
 app.MapGet("/api/Auth/ping", () => Results.Ok("pong"));
+
 app.MapGet("/api/debug/generate-token", (
     IJwtTokenGenerator generator,
     HttpContext context) =>
@@ -185,6 +205,13 @@ app.MapGet("/api/debug/generate-token", (
         issuedAt = DateTime.UtcNow,
         expiresAt = DateTime.UtcNow.AddHours(1)
     });
+});
+
+app.MapGet("/api/debug/jwt-config", () =>
+{
+    var issuer = builder.Configuration["Jwt:Issuer"];
+    var audience = builder.Configuration["Jwt:Audience"];
+    return Results.Ok(new { issuer, audience });
 });
 
 app.Run();

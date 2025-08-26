@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using PetCare.Pets.Application.DTOs;
 using PetCare.Pets.Application.Interfaces;
 using PetCare.Shared.DTOs;
+using System.Security.Claims;
 
 namespace PetCare.Pets.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // ✅ Puedes descomentar esto si ya tienes JWT funcionando
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class PetsController : ControllerBase
     {
         private readonly IPetService _petService;
@@ -19,22 +20,23 @@ namespace PetCare.Pets.Api.Controllers
         }
 
         /// <summary>
-        /// Obtiene todas las mascotas registradas.
+        /// Obtiene todas las mascotas registradas del usuario autenticado.
         /// </summary>
-        /// <returns>Lista de mascotas.</returns>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<PetDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
-            var pets = await _petService.GetAllAsync();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userId, out var ownerId))
+                return Unauthorized("No se pudo identificar al usuario.");
+
+            var pets = await _petService.GetAllByOwnerAsync(ownerId);
             return Ok(pets);
         }
 
         /// <summary>
         /// Obtiene una mascota por su ID.
         /// </summary>
-        /// <param name="id">ID de la mascota.</param>
-        /// <returns>Datos de la mascota.</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(PetDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -45,10 +47,8 @@ namespace PetCare.Pets.Api.Controllers
         }
 
         /// <summary>
-        /// Crea una nueva mascota.
+        /// Crea una nueva mascota asociada al usuario autenticado.
         /// </summary>
-        /// <param name="dto">Datos de la mascota.</param>
-        /// <returns>ID de la mascota creada.</returns>
         [HttpPost]
         [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -57,6 +57,12 @@ namespace PetCare.Pets.Api.Controllers
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userId, out var ownerId))
+                return Unauthorized("No se pudo identificar al usuario.");
+
+            dto.OwnerId = ownerId;
+
             var petId = await _petService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = petId }, new { Id = petId });
         }
@@ -64,8 +70,6 @@ namespace PetCare.Pets.Api.Controllers
         /// <summary>
         /// Actualiza los datos de una mascota.
         /// </summary>
-        /// <param name="id">ID de la mascota.</param>
-        /// <param name="dto">Datos actualizados.</param>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -82,7 +86,6 @@ namespace PetCare.Pets.Api.Controllers
         /// <summary>
         /// Elimina una mascota por su ID.
         /// </summary>
-        /// <param name="id">ID de la mascota.</param>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

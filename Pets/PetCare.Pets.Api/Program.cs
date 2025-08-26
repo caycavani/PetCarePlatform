@@ -9,7 +9,9 @@ using PetCare.Pets.Application.Services;
 using PetCare.Pets.Domain.Interfaces;
 using PetCare.Pets.Infrastructure.Persistence;
 using PetCare.Pets.Infrastructure.Repositories;
+using PetCare.Shared.DTOs.Utils;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 // 🔧 Evitar mapeo automático de claims
@@ -18,8 +20,6 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
-
-// ✅ Configuración
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
 // 🧩 Servicios base
@@ -53,20 +53,22 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// 🔐 Autenticación JWT sin metadata discovery
+// 🔐 Configuración JWT centralizada
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+
+var key = Encoding.UTF8.GetBytes(jwtSettings.Secret);
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"] ?? string.Empty);
         options.RequireHttpsMetadata = false;
         options.SaveToken = true;
 
-        // ✅ Forzar uso del handler clásico
         options.UseSecurityTokenValidators = true;
         options.SecurityTokenValidators.Clear();
         options.SecurityTokenValidators.Add(new JwtSecurityTokenHandler());
 
-        // 🚫 Desactivar metadata discovery
         options.Authority = null;
         options.MetadataAddress = null;
         options.Configuration = null;
@@ -76,11 +78,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidIssuer = jwtSettings.Issuer,
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidAudience = jwtSettings.Audience,
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
+            NameClaimType = ClaimTypes.NameIdentifier,
+            RoleClaimType = ClaimTypes.Role
         };
 
         options.Events = new JwtBearerEvents
@@ -112,11 +117,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// ✅ Política permisiva como predeterminada
 builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder()
-        .RequireAssertion(_ => true)
+        .RequireAuthenticatedUser()
         .Build();
 
     options.FallbackPolicy = options.DefaultPolicy;
@@ -156,11 +160,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// 🧪 Middleware de diagnóstico
+// 🧪 Middleware de diagnóstico extendido
 app.Use(async (context, next) =>
 {
     var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
     Console.WriteLine($"🔍 Authorization Header recibido: {authHeader}");
+
+    if (context.User?.Identity?.IsAuthenticated == true)
+    {
+        Console.WriteLine("🔐 Claims del usuario:");
+        foreach (var claim in context.User.Claims)
+        {
+            Console.WriteLine($"🔸 {claim.Type}: {claim.Value}");
+        }
+    }
+
     await next();
 });
 

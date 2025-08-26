@@ -9,9 +9,11 @@ using PetCare.Notification.Infrastructure.kafka;
 using PetCare.Notification.Infrastructure.Kafka;
 using PetCare.Notification.Infrastructure.Persistence;
 using PetCare.Notification.Infrastructure.Repositories;
+using PetCare.Shared.DTOs.Utils; // ✅ Importación de JwtSettings
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 // 🔧 Configuración de servicios
 builder.Services.AddControllers();
@@ -51,23 +53,20 @@ builder.Services.AddSwaggerGen(options =>
 
 // 🔌 Configuración de DbContext
 builder.Services.AddDbContext<NotificationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
 // 🧩 Inyección de dependencias
-//builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddSingleton<INotificationProducer, NotificationProducer>();
 
 // 📦 Configuración de Kafka desde appsettings.json
-builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
-// 📦 Consumer de Kafka
+builder.Services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
 builder.Services.AddHostedService<NotificationConsumer>();
 
+// 🔐 Configuración JWT centralizada
+builder.Services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>();
 
-// 🔐 Configuración de autenticación JWT
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var secretKey = jwtSettings.GetValue<string>("Secret");
-
-if (string.IsNullOrWhiteSpace(secretKey))
+if (string.IsNullOrWhiteSpace(jwtSettings?.Secret))
     throw new InvalidOperationException("La clave JWT no está configurada correctamente. Verifica 'Jwt:Secret' en appsettings.json.");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -76,21 +75,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
+            ValidIssuer = jwtSettings.Issuer,
             ValidateAudience = true,
+            ValidAudience = jwtSettings.Audience,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings.GetValue<string>("Issuer"),
-            ValidAudience = jwtSettings.GetValue<string>("Audience"),
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
         };
     });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
 // 🚀 Middleware
-app.UseRouting(); // 🔄 Asegura el orden correcto
-
-// 🧪 Swagger disponible en todos los entornos (puedes limitarlo si prefieres)
+app.UseRouting();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -99,9 +98,8 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseHttpsRedirection();
-app.UseAuthentication(); // 🔐 JWT
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

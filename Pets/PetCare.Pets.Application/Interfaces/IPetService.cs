@@ -1,6 +1,4 @@
-﻿
-
-using PetCare.Pets.Application.DTOs;
+﻿using PetCare.Pets.Application.DTOs;
 using PetCare.Shared.DTOs;
 
 namespace PetCare.Pets.Application.Interfaces
@@ -15,6 +13,13 @@ namespace PetCare.Pets.Application.Interfaces
         /// </summary>
         /// <returns>Una colección de <see cref="PetDto"/>.</returns>
         Task<IEnumerable<PetDto>> GetAllAsync();
+
+        /// <summary>
+        /// Obtiene todas las mascotas asociadas a un propietario específico.
+        /// </summary>
+        /// <param name="ownerId">Identificador del propietario.</param>
+        /// <returns>Una colección de <see cref="PetDto"/> pertenecientes al propietario.</returns>
+        Task<IEnumerable<PetDto>> GetAllByOwnerAsync(Guid ownerId);
 
         /// <summary>
         /// Obtiene una mascota por su identificador único.

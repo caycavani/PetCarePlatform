@@ -45,6 +45,8 @@
 
   <ItemGroup>
    
+    <ProjectReference Include="..\..\Shared\PetCare.Shared.DTOs\PetCare.Shared.DTOs.csproj" />
+   
     <ProjectReference Include="..\PetCare.Auth.Application\PetCare.Auth.Application.csproj" />
     <ProjectReference Include="..\PetCare.Auth.Domain\PetCare.Auth.Domain.csproj" />
     <ProjectReference Include="..\PetCare.Auth.Infrastructure\PetCare.Auth.Infrastructure.csproj" />

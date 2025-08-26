@@ -5,14 +5,18 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Design;
     using Microsoft.Extensions.Configuration;
-    using PetCare.Review.Infrastructure.Persistence;
 
     public class ReviewDbContextFactory : IDesignTimeDbContextFactory<ReviewDbContext>
     {
         public ReviewDbContext CreateDbContext(string[] args)
         {
+            var projectRoot = Directory.GetParent(Directory.GetCurrentDirectory())?.FullName
+                              ?? throw new InvalidOperationException("No se pudo determinar el directorio raíz del proyecto.");
+
+            var configPath = Path.Combine(projectRoot, "PetCare.Review.Api");
+
             var config = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.FullName, "PetCare.Review.Api"))
+                .SetBasePath(configPath)
                 .AddJsonFile("appsettings.json", optional: false)
                 .Build();
 
@@ -21,10 +25,10 @@
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new InvalidOperationException("No se encontró la cadena 'DefaultConnection' en appsettings.json.");
 
-            var options = new DbContextOptionsBuilder<ReviewDbContext>();
-            options.UseSqlServer(connectionString);
+            var optionsBuilder = new DbContextOptionsBuilder<ReviewDbContext>();
+            optionsBuilder.UseSqlServer(connectionString);
 
-            return new ReviewDbContext(options.Options);
+            return new ReviewDbContext(optionsBuilder.Options);
         }
     }
 }

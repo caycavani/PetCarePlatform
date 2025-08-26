@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <!-- Referencia al proyecto Domain -->
+    <ProjectReference Include="..\..\Shared\PetCare.Shared.DTOs\PetCare.Shared.DTOs.csproj" />
     <ProjectReference Include="..\PetCare.Auth.Domain\PetCare.Auth.Domain.csproj" />
   </ItemGroup>
 
