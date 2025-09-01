@@ -1,4 +1,5 @@
-﻿networks:
+﻿
+networks:
   petcare_net:
     driver: bridge
 
@@ -31,7 +32,7 @@ services:
     container_name: petcare_auth
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__AuthDatabase: "Server=192.168.10.10,1433;Database=PetCareAuthDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__AuthDatabase: "Server=192.168.1.54,1433;Database=PetCareAuthDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
       Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
       Jwt__Issuer: "http://petcare_auth"
       Jwt__Audience: "PetCareClientApp"
@@ -47,11 +48,16 @@ services:
     container_name: petcare_pets
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCarePetsDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__PetsDatabase: "Server=192.168.1.54,1433;Database=PetCarePetsDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
+      Jwt__Issuer: "http://petcare_auth"
+      Jwt__Audience: "PetCareClientApp"
     ports:
       - "5002:80"
     networks:
       - petcare_net
+    depends_on:
+      - auth-api
 
   booking-api:
     build:
@@ -60,7 +66,7 @@ services:
     container_name: petcare_booking
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCareBookingDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__BookingDatabase: "Server=192.168.1.54,1433;Database=PetCareBookingDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
       Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
       Jwt__Issuer: "http://petcare_auth"
       Jwt__Audience: "PetCareClientApp"
@@ -68,6 +74,8 @@ services:
       - "5003:80"
     networks:
       - petcare_net
+    depends_on:
+      - auth-api
 
   review-api:
     build:
@@ -76,7 +84,7 @@ services:
     container_name: petcare_review
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCareReviewDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__ReviewDatabase: "Server=192.168.1.54,1433;Database=PetCareReviewDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
       Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
       Jwt__Issuer: "http://petcare_auth"
       Jwt__Audience: "PetCareClientApp"
@@ -95,7 +103,7 @@ services:
     container_name: petcare_notification
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCareNotificationDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__NotificationDatabase: "Server=192.168.1.54,1433;Database=PetCareNotificationDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
       Kafka__BootstrapServers: "petcare_kafka:9092"
       Kafka__Topic: "notification-events"
       Kafka__ClientId: "notification-producer"
@@ -119,10 +127,14 @@ services:
     container_name: petcare_payment
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=192.168.10.10,1433;Database=PetCarePaymentDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      ConnectionStrings__PaymentDatabase: "Server=192.168.1.54,1433;Database=PetCarePaymentDb;User Id=petcare_user;Password=Nivacathy2033$#;TrustServerCertificate=true;"
+      Jwt__Secret: "TuClaveSuperSecreta!123!CambiaEstoEnProduccion"
+      Jwt__Issuer: "http://petcare_auth"
+      Jwt__Audience: "PetCareClientApp"
     ports:
       - "5006:80"
     networks:
       - petcare_net
     depends_on:
       - pets-api
+      - auth-api

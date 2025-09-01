@@ -55,13 +55,11 @@ namespace PetCare.Auth.Infrastructure.Persistence
                 entity.Property(u => u.CreatedAt)
                       .IsRequired();
 
-                // 📎 Relación con Role
                 entity.HasOne(u => u.Role)
                       .WithMany(r => r.Users)
                       .HasForeignKey(u => u.RoleId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                // 🔁 Relación con RefreshTokens
                 entity.HasMany(u => u.RefreshTokens)
                       .WithOne(rt => rt.User)
                       .HasForeignKey(rt => rt.UserId)

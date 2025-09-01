@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using PetCare.Pets.Application.DTOs;
 using PetCare.Pets.Application.Interfaces;
 using PetCare.Shared.DTOs;
+using PetCare.Shared.DTOs.Utils;
 using System.Security.Claims;
 
 namespace PetCare.Pets.Api.Controllers
@@ -94,5 +98,25 @@ namespace PetCare.Pets.Api.Controllers
             var deleted = await _petService.DeleteAsync(id);
             return deleted ? NoContent() : NotFound();
         }
+
+        [HttpGet("api/debug/jwt-options")]
+        [AllowAnonymous]
+        public IActionResult GetJwtOptions([FromServices] IOptions<JwtBearerOptions> jwtOptions)
+        {
+            var key = jwtOptions.Value.TokenValidationParameters.IssuerSigningKey;
+            var issuer = jwtOptions.Value.TokenValidationParameters.ValidIssuer;
+            var audience = jwtOptions.Value.TokenValidationParameters.ValidAudience;
+
+            return Ok(new
+            {
+                KeyType = key?.GetType().Name,
+                Issuer = issuer,
+                Audience = audience
+            });
+        }
+
+
+
+
     }
 }

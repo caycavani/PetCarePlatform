@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
 using PetCare.Auth.Application.Interfaces;
 using PetCare.Booking.Api;
 using PetCare.Booking.Infrastructure.Persistence;
@@ -11,7 +12,7 @@ using System.Linq;
 
 namespace PetCare.Booking.Tests.Infrastructure;
 
-public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory : WebApplicationFactory<Microsoft.VisualStudio.TestPlatform.TestHost.Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

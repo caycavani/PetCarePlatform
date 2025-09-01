@@ -38,9 +38,16 @@ var connString = builder.Configuration.GetConnectionString("AuthDatabase")
                  ?? Environment.GetEnvironmentVariable("ConnectionStrings__AuthDatabase");
 Console.WriteLine($"🔧 Cadena de conexión EF: {connString}");
 
-// 🧬 Configuración de EF Core
+// 🧬 Configuración de EF Core con retry
 builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseSqlServer(connString));
+    options.UseSqlServer(connString, sql =>
+    {
+        sql.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null
+        );
+    }));
 
 // 🧩 Registro de interfaces y servicios
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -136,7 +143,7 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// 🚀 Validación y migración con lógica de reintento
+// 🚀 Validación y migración con lógica de reintento y conectividad
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -149,6 +156,12 @@ using (var scope = app.Services.CreateScope())
     {
         try
         {
+            logger.LogInformation($"🔍 Intento {intento}: validando conectividad SQL Server...");
+            if (!dbContext.Database.CanConnect())
+                throw new Exception("No se pudo establecer conexión con la base de datos");
+
+            logger.LogInformation("✅ Conectividad SQL Server validada");
+
             var databaseCreator = dbContext.Database.GetService<IRelationalDatabaseCreator>();
 
             if (!databaseCreator.Exists())
@@ -164,7 +177,7 @@ using (var scope = app.Services.CreateScope())
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, $"❌ Intento {intento} fallido para conectar/migrar base de datos");
+            logger.LogWarning(ex, $"❌ Fallo en intento {intento} de conexión/migración");
 
             if (intento == intentosMaximos)
             {

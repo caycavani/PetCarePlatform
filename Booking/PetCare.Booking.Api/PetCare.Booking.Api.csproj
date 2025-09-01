@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <!-- Referencias a capas internas del dominio -->
+    <ProjectReference Include="..\..\Pets\PetCare.Pets.Infrastructure\PetCare.Pets.Infrastructure.csproj" />
     <ProjectReference Include="..\PetCare.Booking.Infrastructure\PetCare.Booking.Infrastructure.csproj" />
     <ProjectReference Include="..\PetCare.Booking.Domain\PetCare.Booking.Domain.csproj" />
     <ProjectReference Include="..\PetCare.Booking.Application\PetCare.Booking.Application.csproj" />

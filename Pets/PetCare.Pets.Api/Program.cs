@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PetCare.Pets.Application.Interfaces;
@@ -10,184 +8,108 @@ using PetCare.Pets.Domain.Interfaces;
 using PetCare.Pets.Infrastructure.Persistence;
 using PetCare.Pets.Infrastructure.Repositories;
 using PetCare.Shared.DTOs.Utils;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 
-// 🔧 Evitar mapeo automático de claims
-JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+var configuration = builder.Configuration;
 
-// 🧩 Servicios base
+// 🔧 Servicios base
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// 📦 Swagger con soporte JWT
+// 📘 Swagger con JWT
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Pets API", Version = "v1" });
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Ingresa el token JWT con el prefijo Bearer. Ejemplo: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        Title = "PetCare.Pets API",
+        Version = "v1",
+        Description = "Microservicio para gestión de mascotas"
     });
 
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Description = "Token JWT para autenticación",
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+
+    options.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            Array.Empty<string>()
-        }
+        { jwtSecurityScheme, Array.Empty<string>() }
     });
 });
 
-// 🔐 Configuración JWT centralizada
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+// 🔌 DbContext
+builder.Services.AddDbContext<PetDbContext>(options =>
+    options.UseSqlServer(configuration.GetConnectionString("PetsDatabase")));
 
-var key = Encoding.UTF8.GetBytes(jwtSettings.Secret);
+// 🧩 Inyección de dependencias
+builder.Services.AddScoped<IPetService, PetService>();
+builder.Services.AddScoped<IPetRepository, PetRepository>();
+
+// 🔐 Configuración JWT
+builder.Services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>();
+
+if (string.IsNullOrWhiteSpace(jwtSettings?.Secret))
+{
+    Console.WriteLine("❌ Error: Jwt:Secret no está configurado.");
+    throw new InvalidOperationException("La clave JWT no está configurada correctamente. Verifica 'Jwt:Secret' en appsettings.json.");
+}
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-
-        options.UseSecurityTokenValidators = true;
-        options.SecurityTokenValidators.Clear();
-        options.SecurityTokenValidators.Add(new JwtSecurityTokenHandler());
-
-        options.Authority = null;
-        options.MetadataAddress = null;
-        options.Configuration = null;
-
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
             ValidateIssuer = true,
             ValidIssuer = jwtSettings.Issuer,
             ValidateAudience = true,
             ValidAudience = jwtSettings.Audience,
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero,
-            ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
-            NameClaimType = ClaimTypes.NameIdentifier,
-            RoleClaimType = ClaimTypes.Role
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Replace("Bearer ", "");
-                if (!string.IsNullOrEmpty(token))
-                {
-                    Console.WriteLine($"🔍 Token recibido: {token}");
-                }
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine($"❌ Error de autenticación: {context.Exception.Message}");
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = context =>
-            {
-                Console.WriteLine("✅ Token validado correctamente");
-                return Task.CompletedTask;
-            },
-            OnChallenge = context =>
-            {
-                Console.WriteLine($"⚠️ Challenge: {context.Error}, {context.ErrorDescription}");
-                return Task.CompletedTask;
-            }
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
         };
     });
 
-builder.Services.AddAuthorization(options =>
+builder.Services.AddAuthorization();
+
+// 🛠️ Forzar ASP.NET a escuchar en el puerto 80 (alineado con docker-compose)
+//builder.WebHost.UseUrls("http://*:80");
+builder.WebHost.ConfigureKestrel(options =>
 {
-    options.DefaultPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-
-    options.FallbackPolicy = options.DefaultPolicy;
+    options.ListenAnyIP(80); // 🔥 Esto fuerza el uso del puerto 80 dentro del contenedor
 });
-
-// 🗃️ DbContext con SQL Server
-builder.Services.AddDbContext<PetDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("PetsDatabase"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(10),
-            errorNumbersToAdd: null
-        )
-    )
-);
-
-// 🔧 Inyección de dependencias
-builder.Services.AddScoped<IPetService, PetService>();
-builder.Services.AddScoped<IPetRepository, PetRepository>();
-
-// 🔊 Escuchar en el puerto 80 dentro del contenedor
-builder.WebHost.UseUrls("http://*:80");
 
 var app = builder.Build();
 
 // 🚀 Middleware
-if (app.Environment.IsDevelopment())
+app.UseSwagger(); // 🔥 Activado sin condicional para entorno contenedor
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Pets API v1");
-        options.DocumentTitle = "Pets Swagger UI";
-    });
-}
-
-app.UseHttpsRedirection();
-
-// 🧪 Middleware de diagnóstico extendido
-app.Use(async (context, next) =>
-{
-    var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-    Console.WriteLine($"🔍 Authorization Header recibido: {authHeader}");
-
-    if (context.User?.Identity?.IsAuthenticated == true)
-    {
-        Console.WriteLine("🔐 Claims del usuario:");
-        foreach (var claim in context.User.Claims)
-        {
-            Console.WriteLine($"🔸 {claim.Type}: {claim.Value}");
-        }
-    }
-
-    await next();
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "PetCare.Pets API v1");
+    c.RoutePrefix = "swagger"; // Asegura que /swagger/index.html funcione
 });
 
+// ❌ HTTPS deshabilitado para entorno local en contenedor
+// app.UseHttpsRedirection();
+
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// 🧪 Diagnóstico de entorno
+Console.WriteLine("✅ Pets API iniciado en entorno: " + app.Environment.EnvironmentName);
 app.Run();
-
-// 🧪 Diagnóstico final
-var validatorLog = app.Services.GetRequiredService<IOptions<JwtBearerOptions>>().Value.SecurityTokenValidators;
-Console.WriteLine("🔍 Validadores JWT activos:");
-foreach (var validator in validatorLog)
-{
-    Console.WriteLine($"🔧 Validator: {validator.GetType().Name}");
-}
